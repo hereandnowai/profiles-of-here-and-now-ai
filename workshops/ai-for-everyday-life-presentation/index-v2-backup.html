@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI for Everyday Life - HERE AND NOW AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#3b82f6',
+                            dark: '#0f172a',
+                            accent: '#38bdf8'
+                        }
+                    },
+                    animation: {
+                        'float-up': 'floatUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        floatUp: {
+                            '0%': { opacity: 0, transform: 'translateY(20px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            color: #f8fafc;
+            overflow: hidden;
+        }
+
+        /* Slide Container */
+        .slide {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+            transition: opacity 0.5s ease-in-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+            filter: blur(10px);
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            z-index: 10;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+        }
+
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Staggered Animation Delays for children */
+        .slide.active .animate-entry:nth-child(1) { animation-delay: 0.1s; }
+        .slide.active .animate-entry:nth-child(2) { animation-delay: 0.2s; }
+        .slide.active .animate-entry:nth-child(3) { animation-delay: 0.3s; }
+        .slide.active .animate-entry:nth-child(4) { animation-delay: 0.4s; }
+        .slide.active .animate-entry:nth-child(5) { animation-delay: 0.5s; }
+
+        .animate-entry {
+            opacity: 0; /* Start hidden */
+            animation: floatUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* UI Controls */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 1rem;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s;
+            z-index: 50;
+            backdrop-filter: blur(4px);
+        }
+        .nav-btn:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+        }
+        .nav-prev { left: 2rem; }
+        .nav-next { right: 2rem; }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #38bdf8);
+            transition: width 0.3s ease;
+            z-index: 50;
+            box-shadow: 0 0 10px #38bdf8;
+        }
+
+        .slide-footer {
+            position: absolute;
+            bottom: 1.5rem;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #64748b;
+            pointer-events: none;
+        }
+
+        .slide-counter {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 2rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 50;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            color: #94a3b8;
+            cursor: pointer;
+            z-index: 50;
+            transition: color 0.2s;
+        }
+        .fullscreen-btn:hover { color: white; }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @media print {
+            .nav-btn, .progress-bar, .slide-counter, .fullscreen-btn { display: none; }
+            .slide { display: block; page-break-after: always; position: relative; height: auto; opacity: 1; }
+            body { overflow: visible; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Logo -->
+    <div class="absolute top-6 left-1/2 transform -translate-x-1/2 z-50">
+        <img src="assets/images/logo-here-and-now-ai.png" alt="Here and Now AI Logo" class="h-16 md:h-20 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:scale-110 transition duration-300 cursor-pointer">
+    </div>
+
+    <!-- UI Controls -->
+    <button class="nav-btn nav-prev group" onclick="changeSlide(-1)">
+        <i data-lucide="chevron-left" class="group-hover:-translate-x-1 transition-transform"></i>
+    </button>
+    <button class="nav-btn nav-next group" onclick="changeSlide(1)">
+        <i data-lucide="chevron-right" class="group-hover:translate-x-1 transition-transform"></i>
+    </button>
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="slide-counter" id="slideCounter">01 / 20</div>
+    <button class="fullscreen-btn" onclick="toggleFullScreen()" title="Toggle Fullscreen (F)">
+        <i data-lucide="maximize" id="fs-icon"></i>
+    </button>
+
+    <!-- Slide 1: Title Slide -->
+    <div class="slide active" id="slide-1">
+        <div class="text-center max-w-5xl animate-entry">
+            <div class="mb-8 inline-block px-6 py-2 border border-blue-500/50 bg-blue-500/10 rounded-full text-blue-400 text-sm font-bold tracking-[0.2em] uppercase shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                Here and Now AI
+            </div>
+            <h1 class="text-6xl md:text-8xl font-extrabold mb-6 leading-tight text-gradient">
+                AI for Everyday Life
+            </h1>
+            <h1 class="text-5xl md:text-7xl font-bold mb-8 leading-tight text-gradient-blue">
+                for Everyone
+            </h1>
+        </div>
+        <div class="animate-entry mt-8">
+            <h2 class="text-2xl md:text-3xl text-slate-400 mb-8 font-light text-center">A Hands-on Workshop</h2>
+        </div>
+        <div class="animate-entry">
+            <div class="p-8 glass-panel inline-block text-center transform hover:scale-105 transition duration-500 border-l-4 border-l-blue-500">
+                <p class="text-2xl font-semibold text-white">Empowering Tomorrow’s Innovators</p>
+                <div class="w-full h-px bg-gradient-to-r from-transparent via-slate-500 to-transparent my-4"></div>
+                <p class="text-blue-400 font-bold tracking-widest">PURE PRACTICALS - ZERO THEORIES</p>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 2: Our History -->
+    <div class="slide" id="slide-2">
+        <h2 class="text-5xl font-bold mb-20 text-gradient-blue animate-entry text-center">The Journey: From Languages to Agents</h2>
+        
+        <div class="relative w-full max-w-5xl h-48 flex items-center justify-between px-10 animate-entry">
+            <!-- Connecting Line -->
+            <div class="absolute top-1/2 left-20 right-20 h-1 bg-slate-700 rounded-full z-0 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-blue-600 to-sky-400 w-full animate-float-up"></div>
+            </div>
+            
+            <!-- Point 1 -->
+            <div class="relative z-10 text-center group">
+                <div class="w-8 h-8 bg-slate-900 border-4 border-blue-500 rounded-full mx-auto mb-6 shadow-[0_0_20px_rgba(59,130,246,0.6)] group-hover:scale-125 transition duration-300"></div>
+                <div class="glass-panel p-6 w-72 transform group-hover:-translate-y-2 transition duration-300">
+                    <h3 class="text-4xl font-bold mb-2 text-white">2011</h3>
+                    <p class="text-sm text-slate-300 font-semibold">HERE AND NOW<br>Research Institute Founded</p>
+                </div>
+            </div>
+
+            <!-- Point 2 -->
+            <div class="relative z-10 text-center group">
+                <div class="w-8 h-8 bg-slate-900 border-4 border-sky-400 rounded-full mx-auto mb-6 shadow-[0_0_20px_rgba(56,189,248,0.6)] group-hover:scale-125 transition duration-300"></div>
+                <div class="glass-panel p-6 w-72 transform group-hover:-translate-y-2 transition duration-300 border-sky-400/30">
+                    <h3 class="text-4xl font-bold mb-2 text-white">2018</h3>
+                    <p class="text-sm text-slate-300 font-semibold">HERE AND NOW AI<br>Evolution into AI</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 3: Leadership Team -->
+    <div class="slide" id="slide-3">
+        <h2 class="text-5xl font-bold mb-16 text-white animate-entry">Who are we?</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl px-4 animate-entry">
+            <!-- Ruthran -->
+            <div class="glass-panel p-8 text-center transform hover:-translate-y-2 hover:border-blue-500 transition duration-300 group">
+                <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto mb-6 flex items-center justify-center border-2 border-blue-500 shadow-lg group-hover:shadow-blue-500/20 overflow-hidden">
+                    <img src="assets/images/Ruthran Raghavan, CEO & Chief AI Scientist.jpeg" alt="Ruthran Raghavan" class="w-full h-full object-cover">
+                </div>
+                <h3 class="text-2xl font-bold text-gradient-blue mb-1">Ruthran Raghavan</h3>
+                <p class="text-sm font-bold text-white mb-4 uppercase tracking-wide">CEO & Chief AI Scientist</p>
+                <div class="h-px w-12 bg-slate-600 mx-auto mb-4"></div>
+                <p class="italic text-slate-400 text-sm">"Leading with Vision, Purpose & Passion"</p>
+            </div>
+            
+            <!-- Deepti -->
+            <div class="glass-panel p-8 text-center transform hover:-translate-y-2 hover:border-blue-500 transition duration-300 group">
+                <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto mb-6 flex items-center justify-center border-2 border-blue-500 shadow-lg group-hover:shadow-blue-500/20 overflow-hidden">
+                    <img src="assets/images/Deepti Balagopal, COO.jpeg" alt="Deepti Balagopal" class="w-full h-full object-cover">
+                </div>
+                <h3 class="text-2xl font-bold text-gradient-blue mb-1">Deepti Balagopal</h3>
+                <p class="text-sm font-bold text-white mb-4 uppercase tracking-wide">COO</p>
+                <div class="h-px w-12 bg-slate-600 mx-auto mb-4"></div>
+                <p class="italic text-slate-400 text-sm">"Collaboration Fuels Success"</p>
+            </div>
+
+            <!-- Balaji -->
+            <div class="glass-panel p-8 text-center transform hover:-translate-y-2 hover:border-blue-500 transition duration-300 group">
+                <div class="w-32 h-32 bg-slate-800 rounded-full mx-auto mb-6 flex items-center justify-center border-2 border-blue-500 shadow-lg group-hover:shadow-blue-500/20 overflow-hidden">
+                    <img src="assets/images/Balaji Kamalakkannan, CTO.jpeg" alt="Balaji Kamalakkannan" class="w-full h-full object-cover">
+                </div>
+                <h3 class="text-2xl font-bold text-gradient-blue mb-1">Balaji Kamalakkannan</h3>
+                <p class="text-sm font-bold text-white mb-4 uppercase tracking-wide">CTO</p>
+                <div class="h-px w-12 bg-slate-600 mx-auto mb-4"></div>
+                <p class="italic text-slate-400 text-sm">"Innovate to Lead, Code to Change"</p>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 4: First Milestone -->
+    <div class="slide" id="slide-4">
+        <div class="flex flex-col items-center max-w-4xl animate-entry">
+            <h2 class="text-[8rem] font-black mb-0 text-slate-800 leading-none select-none absolute -top-20 z-0 opacity-50">2018</h2>
+            <h3 class="text-5xl font-bold mb-12 text-gradient-blue relative z-10 mt-20">The First AI Model We Built</h3>
+            
+            <div class="glass-panel p-12 w-full text-center border-t-4 border-blue-500 relative z-10 shadow-[0_0_50px_rgba(59,130,246,0.15)]">
+                <div class="mb-8">
+                    <span class="text-blue-400 uppercase tracking-[0.3em] text-xs font-bold">Project Name</span>
+                    <h1 class="text-6xl font-black mt-4 text-white tracking-tight">Caramel AI</h1>
+                </div>
+                
+                <div class="flex justify-center gap-6 my-10">
+                    <div class="flex flex-col items-center gap-3 px-6 py-6 bg-slate-900/80 rounded-lg border border-slate-700 text-slate-200 hover:scale-105 transition duration-300">
+                        <img src="assets/images/gpt-2.jpeg" alt="GPT-2" class="w-24 h-24 object-cover rounded-lg shadow-lg mb-2">
+                        <span class="font-mono font-bold">GPT-2 Model</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-3 px-6 py-6 bg-slate-900/80 rounded-lg border border-slate-700 text-slate-200 hover:scale-105 transition duration-300">
+                        <img src="assets/images/IBM-Watson.png" alt="IBM Watson" class="w-24 h-24 object-contain rounded-lg bg-white p-2 shadow-lg mb-2">
+                        <span class="font-mono font-bold">IBM Watson</span>
+                    </div>
+                </div>
+                
+                <p class="text-slate-400 text-lg italic border-l-2 border-slate-600 pl-4 inline-block">
+                    "This marked the beginning of our transition from data science to Generative AI."
+                </p>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 5: Evolution -->
+    <div class="slide" id="slide-5">
+        <div class="animate-entry text-center mb-12">
+            <h2 class="text-5xl font-bold mb-4 text-gradient-blue">Since 2012: The AI Automation Era</h2>
+            <p class="text-xl text-slate-400">Our Unconscious AI Journey (2011-2018)</p>
+        </div>
+        
+        <div class="flex flex-wrap justify-center items-center gap-4 max-w-6xl animate-entry">
+            <div class="glass-panel px-8 py-6 font-bold text-xl text-slate-300">Data</div>
+            <i data-lucide="arrow-right" class="text-blue-500 animate-pulse"></i>
+            <div class="glass-panel px-8 py-6 font-bold text-xl text-slate-300">Data Science</div>
+            <i data-lucide="arrow-right" class="text-blue-500 animate-pulse"></i>
+            <div class="glass-panel px-8 py-6 font-bold text-xl text-slate-300">SPSS</div>
+            <i data-lucide="arrow-right" class="text-blue-500 animate-pulse"></i>
+            <div class="glass-panel px-8 py-6 font-bold text-xl text-slate-300">Python</div>
+            <i data-lucide="arrow-right" class="text-blue-500 animate-pulse"></i>
+            <div class="glass-panel px-8 py-6 font-bold text-xl bg-blue-600 border-blue-400 text-white shadow-[0_0_30px_rgba(59,130,246,0.6)] transform scale-110">Machine Learning</div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 6: Agentic Era -->
+    <div class="slide" id="slide-6">
+        <div class="animate-entry text-center mb-10">
+            <h2 class="text-5xl font-bold mb-2 text-white">Since 2024: Building AI Agents</h2>
+            <h3 class="text-xl text-blue-400 tracking-[0.3em] uppercase font-semibold">The Superpower of Automation</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-5xl animate-entry">
+            <!-- Human -->
+            <div class="glass-panel p-10 border-l-4 border-red-500/50 opacity-60 grayscale hover:grayscale-0 transition duration-500">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="p-3 bg-slate-800 rounded-lg"><i data-lucide="user" size="32"></i></div>
+                    <h4 class="text-3xl font-bold">Human</h4>
+                </div>
+                <div class="text-xl font-mono bg-slate-900/50 p-4 rounded mb-4">
+                    Task X <i data-lucide="arrow-right" class="inline mx-2 w-4"></i> Output Y
+                </div>
+                <div class="text-4xl font-black text-red-400 flex items-center gap-2">
+                    <i data-lucide="clock" size="32"></i> 2 Days
+                </div>
+            </div>
+
+            <!-- AI Agent -->
+            <div class="glass-panel p-10 border-l-4 border-green-400 shadow-[0_0_30px_rgba(74,222,128,0.15)] transform scale-105">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="p-3 bg-green-500/20 rounded-lg"><i data-lucide="bot" size="32" class="text-green-400"></i></div>
+                    <h4 class="text-3xl font-bold text-green-400">AI Agent</h4>
+                </div>
+                <div class="text-xl font-mono bg-slate-900/50 p-4 rounded mb-4 border border-green-500/30">
+                    Task X <i data-lucide="arrow-right" class="inline mx-2 w-4 text-green-400"></i> Output Y
+                </div>
+                <div class="text-4xl font-black text-green-400 flex items-center gap-2">
+                    <i data-lucide="zap" size="32"></i> 2 Minutes
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-12 text-center animate-entry">
+            <p class="text-slate-400 mb-2 uppercase tracking-widest text-xs">Current Scale</p>
+            <p class="text-3xl font-bold text-white">Building 10 AI-powered apps/agents per day</p>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 7: Jargon -->
+    <div class="slide" id="slide-7">
+        <h2 class="text-5xl font-bold mb-12 text-gradient-blue animate-entry">Understanding the Basics</h2>
+        <div class="grid grid-cols-1 gap-5 max-w-4xl w-full animate-entry">
+            
+            <div class="glass-panel p-5 flex items-center gap-6 hover:bg-slate-800/50 transition group">
+                <div class="bg-blue-600 p-4 rounded-xl shadow-lg shadow-blue-900/50"><i data-lucide="brain" class="text-white" size="24"></i></div>
+                <div>
+                    <span class="font-bold text-2xl text-blue-300 group-hover:text-blue-200">AI (Artificial Intelligence)</span>
+                    <p class="text-slate-400 mt-1">The umbrella term for machines mimicking human intelligence.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 flex items-center gap-6 hover:bg-slate-800/50 transition group">
+                <div class="bg-purple-600 p-4 rounded-xl shadow-lg shadow-purple-900/50"><i data-lucide="database" class="text-white" size="24"></i></div>
+                <div>
+                    <span class="font-bold text-2xl text-purple-300 group-hover:text-purple-200">ML (Machine Learning)</span>
+                    <p class="text-slate-400 mt-1">Computers learning from data without being explicitly programmed.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 flex items-center gap-6 hover:bg-slate-800/50 transition group">
+                <div class="bg-pink-600 p-4 rounded-xl shadow-lg shadow-pink-900/50"><i data-lucide="network" class="text-white" size="24"></i></div>
+                <div>
+                    <span class="font-bold text-2xl text-pink-300 group-hover:text-pink-200">DL (Deep Learning)</span>
+                    <p class="text-slate-400 mt-1">Neural networks that mimic the human brain.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 flex items-center gap-6 hover:bg-slate-800/50 transition group">
+                <div class="bg-orange-600 p-4 rounded-xl shadow-lg shadow-orange-900/50"><i data-lucide="sparkles" class="text-white" size="24"></i></div>
+                <div>
+                    <span class="font-bold text-2xl text-orange-300 group-hover:text-orange-200">GenAI (Generative AI)</span>
+                    <p class="text-slate-400 mt-1">AI that creates new content (text, images, code).</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-5 flex items-center gap-6 border border-green-400/50 bg-green-900/10 shadow-[0_0_20px_rgba(74,222,128,0.1)]">
+                <div class="bg-green-600 p-4 rounded-xl shadow-lg shadow-green-900/50"><i data-lucide="bot" class="text-white" size="24"></i></div>
+                <div>
+                    <span class="font-bold text-2xl text-green-300">AI Agent</span>
+                    <p class="text-slate-300 mt-1">Autonomous systems using <span class="text-green-200 font-mono text-sm bg-green-900/50 px-2 py-0.5 rounded">Tools</span> + <span class="text-green-200 font-mono text-sm bg-green-900/50 px-2 py-0.5 rounded">Context</span>.</p>
+                </div>
+            </div>
+
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 8: Setup -->
+    <div class="slide" id="slide-8">
+        <h2 class="text-5xl font-bold mb-4 animate-entry">Let's Get Hands-On</h2>
+        <p class="text-2xl text-slate-400 mb-16 animate-entry font-light">Download & Login</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 w-full max-w-5xl animate-entry">
+            <!-- ChatGPT -->
+            <div class="glass-panel p-10 text-center flex flex-col items-center hover:bg-slate-800/50 transition duration-300 group">
+                <div class="w-28 h-28 bg-white rounded-full flex items-center justify-center mb-8 shadow-lg group-hover:shadow-white/20 transition">
+                    <!-- Simple SVG for OpenAI/ChatGPT -->
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.5 7.5"/><path d="M12 12l9.5-4.5"/></svg>
+                </div>
+                <h3 class="text-3xl font-bold mb-2 text-white">ChatGPT</h3>
+                <p class="text-slate-400 mb-8">Play Store / App Store</p>
+                <button class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold text-sm transition shadow-lg shadow-blue-900/50 flex items-center gap-2">
+                    <i data-lucide="log-in" size="16"></i> Login with Google
+                </button>
+            </div>
+
+            <!-- NotebookLM -->
+            <div class="glass-panel p-10 text-center flex flex-col items-center hover:bg-slate-800/50 transition duration-300 group">
+                <div class="w-28 h-28 bg-white rounded-full flex items-center justify-center mb-8 shadow-lg group-hover:shadow-white/20 transition">
+                    <i data-lucide="book-open" class="text-slate-900" size="48"></i>
+                </div>
+                <h3 class="text-3xl font-bold mb-2 text-white">NotebookLM</h3>
+                <p class="text-slate-400 mb-8">notebooklm.google</p>
+                <button class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold text-sm transition shadow-lg shadow-blue-900/50 flex items-center gap-2">
+                    <i data-lucide="log-in" size="16"></i> Login with Google
+                </button>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 9: Interaction Modes -->
+    <div class="slide" id="slide-9">
+        <h2 class="text-5xl font-bold mb-16 text-gradient-blue animate-entry">Getting Started with ChatGPT</h2>
+        
+        <div class="grid grid-cols-3 gap-8 max-w-6xl w-full animate-entry">
+            <div class="glass-panel p-10 text-center hover:-translate-y-2 transition duration-300 group">
+                <div class="bg-blue-500/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-500/20 transition">
+                    <i data-lucide="message-square" size="40" class="text-blue-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Chat Mode</h3>
+                <p class="text-slate-400 leading-relaxed">Typing prompts manually.</p>
+            </div>
+
+            <div class="glass-panel p-10 text-center hover:-translate-y-2 transition duration-300 group">
+                <div class="bg-purple-500/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-500/20 transition">
+                    <i data-lucide="mic" size="40" class="text-purple-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-white">Dictate Mode</h3>
+                <p class="text-slate-400 leading-relaxed">Speech-to-Text input.</p>
+            </div>
+
+            <div class="glass-panel p-10 text-center border border-green-400/50 shadow-[0_0_20px_rgba(74,222,128,0.1)] hover:-translate-y-2 transition duration-300 group bg-green-900/5">
+                <div class="bg-green-500/10 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-green-500/20 transition">
+                    <i data-lucide="headphones" size="40" class="text-green-400"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3 text-green-400">Voice Mode</h3>
+                <p class="text-slate-400 leading-relaxed">Real-time conversation.</p>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 10: Demo 1 -->
+    <div class="slide" id="slide-10">
+        <div class="absolute top-20 right-20 text-slate-800 font-black text-9xl opacity-50 select-none">01</div>
+        <div class="animate-entry z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 text-blue-400 rounded-full text-sm font-bold uppercase tracking-widest mb-6">
+                <i data-lucide="message-square" size="16"></i> Scenario 1
+            </div>
+            <h2 class="text-5xl font-bold mb-12 text-white">Task: Fact Retrieval</h2>
+        </div>
+        
+        <div class="glass-panel p-12 max-w-4xl w-full text-center animate-entry z-10">
+            <p class="text-xl text-slate-400 mb-4">The Prompt</p>
+            <div class="bg-slate-900 p-8 rounded-2xl border border-slate-700 text-3xl font-mono text-white shadow-inner">
+                "Who is the CEO of Canara Bank?"
+            </div>
+            <div class="mt-10 flex items-center justify-center gap-3 text-green-400 bg-green-900/20 px-6 py-3 rounded-full inline-flex border border-green-500/20">
+                <i data-lucide="check-circle"></i>
+                <span class="font-semibold">Testing Accuracy & Speed</span>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 11: Demo 2 -->
+    <div class="slide" id="slide-11">
+        <div class="absolute top-20 right-20 text-slate-800 font-black text-9xl opacity-50 select-none">02</div>
+        <div class="animate-entry z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 text-purple-400 rounded-full text-sm font-bold uppercase tracking-widest mb-6">
+                <i data-lucide="mic" size="16"></i> Scenario 2
+            </div>
+            <h2 class="text-5xl font-bold mb-12 text-white">Task: Follow-up Context</h2>
+        </div>
+        
+        <div class="glass-panel p-12 max-w-4xl w-full animate-entry z-10">
+             <div class="space-y-6">
+                <div class="flex items-center gap-6">
+                    <div class="bg-purple-600 p-4 rounded-full shadow-lg"><i data-lucide="mic" class="text-white w-6 h-6"></i></div>
+                    <div class="bg-slate-900 p-6 rounded-2xl text-2xl font-mono w-full border-l-4 border-purple-500">
+                        "Who founded the bank?"
+                    </div>
+                </div>
+                <div class="flex justify-center"><i data-lucide="arrow-down" class="text-slate-600"></i></div>
+                <div class="flex items-center gap-6">
+                    <div class="bg-purple-600 p-4 rounded-full shadow-lg"><i data-lucide="mic" class="text-white w-6 h-6"></i></div>
+                    <div class="bg-slate-900 p-6 rounded-2xl text-2xl font-mono w-full border-l-4 border-purple-500">
+                        "When was he born?"
+                    </div>
+                </div>
+             </div>
+             <div class="mt-10 p-6 bg-blue-900/20 border border-blue-500/30 rounded-xl text-center backdrop-blur-sm">
+                <span class="font-bold text-blue-300 text-lg">Key Learning:</span> 
+                <span class="text-slate-300 ml-2">The AI remembers "the bank" is Canara Bank.</span>
+             </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 12: Demo 3 -->
+    <div class="slide" id="slide-12">
+        <div class="absolute top-20 right-20 text-slate-800 font-black text-9xl opacity-50 select-none">03</div>
+        <div class="animate-entry z-10">
+             <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-400 rounded-full text-sm font-bold uppercase tracking-widest mb-6">
+                <i data-lucide="headphones" size="16"></i> Scenario 3
+            </div>
+            <h2 class="text-5xl font-bold mb-12 text-white">Task: Hands-Free Productivity</h2>
+        </div>
+        
+        <div class="relative w-full max-w-3xl flex flex-col items-center justify-center animate-entry z-10">
+            <div class="w-40 h-40 rounded-full bg-slate-900 border-4 border-green-500 flex items-center justify-center mb-10 shadow-[0_0_60px_rgba(74,222,128,0.4)] animate-pulse">
+                <i data-lucide="mic" size="64" class="text-green-500"></i>
+            </div>
+            
+            <div class="glass-panel p-8 text-center w-full italic text-2xl text-slate-200 leading-relaxed font-light">
+                "I want to change the registered mobile number of my Canara Bank account. I need to write a letter to my bank."
+            </div>
+
+            <div class="mt-8 flex items-center gap-3 text-red-400 bg-red-900/20 px-6 py-3 rounded-full border border-red-500/20">
+                <i data-lucide="alert-triangle" size="20"></i>
+                <span class="font-bold uppercase tracking-widest">Constraint: Do not touch the keyboard</span>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 13: Prompt Engineering -->
+    <div class="slide" id="slide-13">
+        <h2 class="text-5xl font-bold mb-12 text-gradient-blue animate-entry">The Art of Prompting</h2>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 w-full max-w-[90rem] px-6 animate-entry">
+            <!-- Role -->
+            <div class="glass-panel p-6 flex flex-col h-full border-t-4 border-blue-500 hover:-translate-y-2 transition duration-300">
+                <div class="bg-blue-500/20 w-10 h-10 rounded-lg flex items-center justify-center mb-4"><span class="font-bold text-blue-400">1</span></div>
+                <h3 class="font-bold text-2xl mb-2">Role</h3>
+                <p class="text-sm text-slate-400 mb-4">Who is the AI?</p>
+                <p class="text-sm bg-slate-900 p-4 rounded-lg mt-auto font-mono text-blue-200">"You are an expert banker..."</p>
+            </div>
+            <!-- Task -->
+            <div class="glass-panel p-6 flex flex-col h-full border-t-4 border-green-500 hover:-translate-y-2 transition duration-300">
+                <div class="bg-green-500/20 w-10 h-10 rounded-lg flex items-center justify-center mb-4"><span class="font-bold text-green-400">2</span></div>
+                <h3 class="font-bold text-2xl mb-2">Task</h3>
+                <p class="text-sm text-slate-400 mb-4">What is the work?</p>
+                <p class="text-sm bg-slate-900 p-4 rounded-lg mt-auto font-mono text-green-200">"Write a formal letter..."</p>
+            </div>
+            <!-- Context -->
+            <div class="glass-panel p-6 flex flex-col h-full border-t-4 border-yellow-500 hover:-translate-y-2 transition duration-300">
+                <div class="bg-yellow-500/20 w-10 h-10 rounded-lg flex items-center justify-center mb-4"><span class="font-bold text-yellow-400">3</span></div>
+                <h3 class="font-bold text-2xl mb-2">Context</h3>
+                <p class="text-sm text-slate-400 mb-4">Necessary Info</p>
+                <p class="text-sm bg-slate-900 p-4 rounded-lg mt-auto font-mono text-yellow-200">"Account type is Savings..."</p>
+            </div>
+            <!-- Format -->
+            <div class="glass-panel p-6 flex flex-col h-full border-t-4 border-purple-500 hover:-translate-y-2 transition duration-300">
+                <div class="bg-purple-500/20 w-10 h-10 rounded-lg flex items-center justify-center mb-4"><span class="font-bold text-purple-400">4</span></div>
+                <h3 class="font-bold text-2xl mb-2">Format</h3>
+                <p class="text-sm text-slate-400 mb-4">Output Style</p>
+                <p class="text-sm bg-slate-900 p-4 rounded-lg mt-auto font-mono text-purple-200">"Bullet points / PDF..."</p>
+            </div>
+            <!-- Constraint -->
+            <div class="glass-panel p-6 flex flex-col h-full border-t-4 border-red-500 hover:-translate-y-2 transition duration-300">
+                <div class="bg-red-500/20 w-10 h-10 rounded-lg flex items-center justify-center mb-4"><span class="font-bold text-red-400">5</span></div>
+                <h3 class="font-bold text-2xl mb-2">Constraint</h3>
+                <p class="text-sm text-slate-400 mb-4">Limits</p>
+                <p class="text-sm bg-slate-900 p-4 rounded-lg mt-auto font-mono text-red-200">"Under 100 words"</p>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 14: Use Cases -->
+    <div class="slide" id="slide-14">
+        <h2 class="text-5xl font-bold mb-12 animate-entry">High-Impact Use Cases</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl animate-entry">
+            
+            <div class="glass-panel p-8 flex items-center gap-6 hover:bg-slate-800/50 transition">
+                <div class="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center text-4xl">🏥</div>
+                <div>
+                    <h3 class="font-bold text-2xl text-blue-300">Medical</h3>
+                    <p class="text-slate-400">Analyzing lab reports & prescriptions.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-8 flex items-center gap-6 hover:bg-slate-800/50 transition">
+                 <div class="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center text-4xl">⚖️</div>
+                <div>
+                    <h3 class="font-bold text-2xl text-purple-300">Legal</h3>
+                    <p class="text-slate-400">Understanding Indian Law documents.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-8 flex items-center gap-6 hover:bg-slate-800/50 transition">
+                 <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center text-4xl">💰</div>
+                <div>
+                    <h3 class="font-bold text-2xl text-green-300">Financial</h3>
+                    <p class="text-slate-400">Quarterly results, FD vs MF, CTS analysis.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-8 flex items-center gap-6 hover:bg-slate-800/50 transition">
+                 <div class="w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center text-4xl">📧</div>
+                <div>
+                    <h3 class="font-bold text-2xl text-orange-300">Business</h3>
+                    <p class="text-slate-400">Drafting professional communications.</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-8 flex items-center gap-6 col-span-1 md:col-span-2 hover:bg-slate-800/50 transition border-t-4 border-pink-500">
+                 <div class="w-16 h-16 rounded-full bg-pink-500/20 flex items-center justify-center text-4xl">📢</div>
+                <div>
+                    <h3 class="font-bold text-2xl text-pink-300">Marketing</h3>
+                    <p class="text-slate-400">Content generation, Ad copy, and Strategy.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 15: Generative Visuals -->
+    <div class="slide" id="slide-15">
+        <h2 class="text-5xl font-bold mb-16 text-gradient-blue animate-entry">Generative Visuals</h2>
+        
+        <div class="flex flex-col md:flex-row gap-12 items-center justify-center w-full max-w-6xl animate-entry">
+            <div class="glass-panel p-8 w-72 h-72 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-3xl">
+                <i data-lucide="image" size="64" class="text-slate-600 mb-4"></i>
+                <p class="text-slate-400 font-semibold">Input Image</p>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <i data-lucide="arrow-right" size="48" class="hidden md:block text-blue-500 animate-pulse"></i>
+                <i data-lucide="arrow-down" size="48" class="block md:hidden text-blue-500 animate-pulse"></i>
+            </div>
+
+            <div class="flex flex-col gap-6 w-full max-w-md">
+                <div class="glass-panel p-6 border-l-4 border-blue-500 shadow-lg shadow-blue-900/20">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-sm font-bold text-blue-400 uppercase tracking-wider">Task A</p>
+                        <i data-lucide="baby" size="20" class="text-blue-400"></i>
+                    </div>
+                    <p class="text-lg font-light text-white">"Create an image of this person as a 10-year-old."</p>
+                </div>
+                <div class="glass-panel p-6 border-l-4 border-purple-500 shadow-lg shadow-purple-900/20">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-sm font-bold text-purple-400 uppercase tracking-wider">Task B</p>
+                         <i data-lucide="user-plus" size="20" class="text-purple-400"></i>
+                    </div>
+                    <p class="text-lg font-light text-white">"Create an image of this person as a 90-year-old."</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-16 text-center bg-slate-900/80 px-8 py-3 rounded-full border border-slate-700 animate-entry">
+             <span class="text-slate-400 mr-2">Tech Stack:</span>
+             <span class="text-white font-bold">Generative Adversarial Networks (GANs)</span>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 16: NotebookLM -->
+    <div class="slide" id="slide-16">
+        <div class="animate-entry text-center mb-12">
+            <h2 class="text-3xl font-bold mb-2 text-slate-400">Your AI Researcher</h2>
+            <h3 class="text-6xl font-bold text-gradient-blue">Google NotebookLM</h3>
+        </div>
+        
+        <div class="glass-panel p-12 max-w-5xl w-full animate-entry border-t-4 border-blue-500">
+            <div class="text-center mb-10">
+                <p class="text-2xl font-light text-white italic">"Chat with your own documents"</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center p-6 bg-slate-800/50 rounded-2xl hover:bg-slate-800 transition group border border-transparent hover:border-red-400/30">
+                    <div class="bg-red-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="mic" size="32" class="text-red-400"></i>
+                    </div>
+                    <p class="font-bold text-lg text-white">Audio Podcast</p>
+                    <p class="text-sm text-slate-400 mt-2">Turn boring reports into engaging conversations.</p>
+                </div>
+                
+                <div class="text-center p-6 bg-slate-800/50 rounded-2xl hover:bg-slate-800 transition group border border-transparent hover:border-blue-400/30">
+                    <div class="bg-blue-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="video" size="32" class="text-blue-400"></i>
+                    </div>
+                    <p class="font-bold text-lg text-white">Video Presentation</p>
+                    <p class="text-sm text-slate-400 mt-2">Generate visual summaries automatically.</p>
+                </div>
+                
+                <div class="text-center p-6 bg-slate-800/50 rounded-2xl hover:bg-slate-800 transition group border border-transparent hover:border-green-400/30">
+                    <div class="bg-green-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="file-text" size="32" class="text-green-400"></i>
+                    </div>
+                    <p class="font-bold text-lg text-white">Deep Analysis</p>
+                    <p class="text-sm text-slate-400 mt-2">Instant Mind Maps & Executive Summaries.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 17: Cutting Edge -->
+    <div class="slide" id="slide-17">
+        <h2 class="text-5xl font-bold mb-12 text-gradient-blue animate-entry">The Cutting Edge</h2>
+        
+        <div class="grid grid-cols-2 gap-8 max-w-5xl w-full animate-entry">
+            <div class="glass-panel p-8 border-l-4 border-blue-500 hover:bg-slate-800/50 transition">
+                <h3 class="font-bold text-xl mb-2 text-white">AI Google Studio</h3>
+                <p class="text-slate-400">Multimodal capabilities deep dive.</p>
+            </div>
+            <div class="glass-panel p-8 border-l-4 border-green-500 hover:bg-slate-800/50 transition">
+                <h3 class="font-bold text-xl mb-2 text-white">Real-world App: CTS</h3>
+                <p class="text-slate-400">Cheque Truncation System (Umesh Kumar Example).</p>
+            </div>
+            <div class="glass-panel p-8 border-l-4 border-purple-500 hover:bg-slate-800/50 transition">
+                <h3 class="font-bold text-xl mb-2 text-white">Video Gen</h3>
+                <p class="text-slate-400">Veo 2 & Veo 3 (Text-to-Video).</p>
+            </div>
+            <div class="glass-panel p-8 border-l-4 border-pink-500 hover:bg-slate-800/50 transition">
+                <h3 class="font-bold text-xl mb-2 text-white">Meta AI</h3>
+                <p class="text-slate-400">Interactive social tools & Personas.</p>
+            </div>
+        </div>
+
+        <div class="mt-12 p-8 glass-panel w-full max-w-4xl border border-orange-500/50 shadow-[0_0_30px_rgba(249,115,22,0.1)] animate-entry">
+            <div class="flex items-start gap-6">
+                <i data-lucide="flame" size="40" class="text-orange-500 shrink-0"></i>
+                <div>
+                    <h3 class="text-2xl font-bold text-orange-400 mb-2">Discussion: Is AI Dangerous?</h3>
+                    <p class="italic text-slate-300 text-lg leading-relaxed">"The Fire Analogy: Fire cooks food, but can burn houses. AI is a tool—it depends on how we use it."</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 18: Q&A -->
+    <div class="slide" id="slide-18">
+        <div class="animate-entry">
+            <div class="w-64 h-64 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mb-10 shadow-[0_0_80px_rgba(59,130,246,0.5)] animate-bounce">
+                <span class="text-[10rem] font-black text-white">?</span>
+            </div>
+        </div>
+        <div class="animate-entry text-center">
+            <h2 class="text-7xl font-bold mb-4 text-white">Q&A Session</h2>
+            <p class="text-3xl text-slate-300 mb-8 font-light">Let's Discuss</p>
+            <p class="text-slate-400 max-w-2xl text-center text-lg">Ask us about integration, privacy, or the future of AI Agents.</p>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 19: Conclusion -->
+    <div class="slide" id="slide-19">
+        <div class="animate-entry text-center">
+            <h2 class="text-7xl font-bold mb-6 text-gradient-blue">Thank You</h2>
+            <h3 class="text-3xl italic text-slate-300 mb-16 font-light">"Innovate to Lead, Code to Change"</h3>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-8 text-center max-w-5xl w-full animate-entry">
+            <div class="p-6 glass-panel border-t-4 border-blue-500 hover:transform hover:-translate-y-2 transition duration-300">
+                <div class="w-16 h-16 bg-slate-800 rounded-full mx-auto mb-4 flex items-center justify-center"><i data-lucide="user" class="text-blue-400"></i></div>
+                <p class="font-bold text-xl text-white">Ruthran Raghavan</p>
+                <p class="text-sm text-slate-400 uppercase tracking-wider mt-1">CEO</p>
+            </div>
+            <div class="p-6 glass-panel border-t-4 border-blue-500 hover:transform hover:-translate-y-2 transition duration-300">
+                <div class="w-16 h-16 bg-slate-800 rounded-full mx-auto mb-4 flex items-center justify-center"><i data-lucide="user" class="text-blue-400"></i></div>
+                <p class="font-bold text-xl text-white">Deepti Balagopal</p>
+                <p class="text-sm text-slate-400 uppercase tracking-wider mt-1">COO</p>
+            </div>
+            <div class="p-6 glass-panel border-t-4 border-blue-500 hover:transform hover:-translate-y-2 transition duration-300">
+                <div class="w-16 h-16 bg-slate-800 rounded-full mx-auto mb-4 flex items-center justify-center"><i data-lucide="user" class="text-blue-400"></i></div>
+                <p class="font-bold text-xl text-white">Balaji K</p>
+                <p class="text-sm text-slate-400 uppercase tracking-wider mt-1">CTO</p>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 20: Resources -->
+    <div class="slide" id="slide-20">
+        <h2 class="text-5xl font-bold mb-16 animate-entry">Continue Your Journey</h2>
+        
+        <div class="flex flex-col gap-8 max-w-3xl w-full animate-entry">
+            <a href="https://github.com/hereandnowai" target="_blank" class="glass-panel p-8 flex items-center gap-8 hover:bg-slate-800 transition cursor-pointer group border-l-4 border-white">
+                <i data-lucide="github" size="48" class="text-white group-hover:text-blue-400 transition"></i>
+                <div>
+                    <h3 class="text-2xl font-bold text-white group-hover:text-blue-400 transition">Access Prompts & Methods</h3>
+                    <p class="text-slate-400 font-mono mt-1">github.com/hereandnowai</p>
+                </div>
+                <i data-lucide="external-link" class="ml-auto text-slate-600 group-hover:text-white"></i>
+            </a>
+
+            <div class="glass-panel p-8 flex items-center gap-8 border border-yellow-500/30 bg-yellow-900/5 hover:bg-yellow-900/10 transition">
+                <img src="assets/images/qr-code-google-review-hereandnowai.png" alt="Google Review QR" class="w-32 h-32 rounded-lg shadow-lg border-4 border-white">
+                <div>
+                    <h3 class="text-2xl font-bold text-yellow-400">Feedback</h3>
+                    <p class="text-slate-300 mt-1">"Please give us 5 Stars on Google!"</p>
+                    <p class="text-xs text-slate-500 mt-2">Scan to review</p>
+                </div>
+            </div>
+
+             <div class="glass-panel p-8 flex items-center gap-8 hover:bg-slate-800 transition border-l-4 border-green-500">
+                <i data-lucide="calendar-check" size="48" class="text-green-400"></i>
+                <div>
+                    <h3 class="text-2xl font-bold text-green-400">Next Steps</h3>
+                    <p class="text-slate-300 mt-1">Join our upcoming VACs on Agentic AI.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // State
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
+        const totalSlides = slides.length;
+
+        // Add animation classes to children of slides for staggered effect
+        slides.forEach(slide => {
+            const children = slide.children;
+            Array.from(children).forEach((child) => {
+                if(!child.classList.contains('slide-footer')) {
+                    child.classList.add('animate-entry');
+                }
+            });
+        });
+
+        // Functions
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                if(index === currentSlide) {
+                    slide.classList.add('active');
+                    // Re-trigger animations by removing/adding class (optional, but keeps it fresh)
+                    // In simple CSS implementations, display:none to flex usually resets anims
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            
+            // Update Progress Bar
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Update Counter
+            slideCounter.innerText = `${String(currentSlide + 1).padStart(2, '0')} / ${totalSlides}`;
+        }
+
+        function changeSlide(direction) {
+            const newIndex = currentSlide + direction;
+            if (newIndex >= 0 && newIndex < totalSlides) {
+                currentSlide = newIndex;
+                updateSlide();
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullScreen();
+            }
+        });
+
+        // Touch Support (Swipe)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) changeSlide(1);
+            if (touchEndX > touchStartX + 50) changeSlide(-1);
+        }
+
+        // Initialize
+        updateSlide();
+    </script>
+    <canvas id="bg-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-30"></canvas>
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.color = `rgba(56, 189, 248, ${Math.random() * 0.5})`;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    </script>
+</body>
+</html>
