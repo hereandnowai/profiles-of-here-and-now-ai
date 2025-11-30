@@ -599,6 +599,87 @@
             0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
             50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.6); }
         }
+
+        /* Custom Video Play Button */
+        .video-wrapper {
+            position: relative;
+            width: 75%;
+            height: 75%;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border-radius: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 1rem;
+        }
+
+        .custom-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-purple));
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            z-index: 10;
+        }
+
+        .custom-play-btn:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.8);
+        }
+
+        .custom-play-btn svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+            margin-left: 5px;
+        }
+
+        .custom-play-btn.hidden {
+            display: none;
+        }
+
+        .video-iframe-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-iframe-container.active {
+            display: block;
+        }
+
+        .video-iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -656,26 +737,54 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 2: What is Design Thinking -->
+        <!-- Slide 2: Design Thinking Video -->
         <div class="slide" id="slide-2">
             <h2>What is Design Thinking?</h2>
-            <div class="video-container" style="width: 75%; height: 75%; display: flex; justify-content: center; align-items: center;">
-                <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src="https://www.youtube.com/embed/gnWj97CEjeo" 
-                    title="Design Thinking Video" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    allowfullscreen
-                    style="border-radius: 1rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);">
-                </iframe>
+            <div class="video-wrapper">
+                <div class="video-thumbnail" id="videoThumbnail">
+                    <img src="https://img.youtube.com/vi/gnWj97CEjeo/maxresdefault.jpg" alt="Design Thinking Video Thumbnail">
+                </div>
+                <button class="custom-play-btn" id="customPlayBtn" onclick="playVideo()">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <div class="video-iframe-container" id="videoContainer">
+                    <!-- YouTube iframe will be inserted here by JavaScript -->
+                </div>
             </div>
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 3: The Five Stages Overview -->
+        <!-- Slide 3: What is Design Thinking (Text) -->
         <div class="slide" id="slide-3">
+            <h2>What is Design Thinking?</h2>
+            <div class="quote-block" style="max-width: 800px;">
+                <p>"Design thinking is a human-centered approach to innovation that draws from the designer's toolkit to integrate the needs of people, the possibilities of technology, and the requirements for business success."</p>
+                <cite>— Tim Brown, CEO of IDEO</cite>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 900px; margin-top: 2rem;">
+                <div class="glass-panel" style="padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎯</div>
+                    <h3 style="font-size: 1rem; color: var(--accent);">Desirability</h3>
+                    <p style="font-size: 0.875rem;">What do people need?</p>
+                </div>
+                <div class="glass-panel" style="padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚙️</div>
+                    <h3 style="font-size: 1rem; color: var(--accent);">Feasibility</h3>
+                    <p style="font-size: 0.875rem;">Is it technically possible?</p>
+                </div>
+                <div class="glass-panel" style="padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💰</div>
+                    <h3 style="font-size: 1rem; color: var(--accent);">Viability</h3>
+                    <p style="font-size: 0.875rem;">Can it be sustainable?</p>
+                </div>
+            </div>
+            <div class="slide-footer">www.hereandnowai.com</div>
+        </div>
+
+        <!-- Slide 4: The Five Stages Overview -->
+        <div class="slide" id="slide-4">
             <h2 style="margin-bottom: 2rem;">The Five Stages of Design Thinking</h2>
             <div class="stages-grid">
                 <div class="stage-card" style="background: var(--gradient-empathy);">
@@ -715,8 +824,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 4: Empathize -->
-        <div class="slide" id="slide-4">
+        <!-- Slide 5: Empathize -->
+        <div class="slide" id="slide-5">
             <div class="detail-layout">
                 <div class="detail-content">
                     <h2 style="background: var(--gradient-empathy); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Stage 1: Empathize</h2>
@@ -739,8 +848,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 5: Define -->
-        <div class="slide" id="slide-5">
+        <!-- Slide 6: Define -->
+        <div class="slide" id="slide-6">
             <div class="detail-layout">
                 <div class="detail-content">
                     <h2 style="background: var(--gradient-define); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Stage 2: Define</h2>
@@ -763,8 +872,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 6: Ideate -->
-        <div class="slide" id="slide-6">
+        <!-- Slide 7: Ideate -->
+        <div class="slide" id="slide-7">
             <div class="detail-layout">
                 <div class="detail-content">
                     <h2 style="background: var(--gradient-ideate); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Stage 3: Ideate</h2>
@@ -787,8 +896,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 7: Prototype -->
-        <div class="slide" id="slide-7">
+        <!-- Slide 8: Prototype -->
+        <div class="slide" id="slide-8">
             <div class="detail-layout">
                 <div class="detail-content">
                     <h2 style="background: var(--gradient-prototype); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Stage 4: Prototype</h2>
@@ -811,8 +920,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 8: Test -->
-        <div class="slide" id="slide-8">
+        <!-- Slide 9: Test -->
+        <div class="slide" id="slide-9">
             <div class="detail-layout">
                 <div class="detail-content">
                     <h2 style="background: var(--gradient-test); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Stage 5: Test</h2>
@@ -846,8 +955,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 9: Design Thinking Mindsets -->
-        <div class="slide" id="slide-9">
+        <!-- Slide 10: Design Thinking Mindsets -->
+        <div class="slide" id="slide-10">
             <h2>Design Thinking Mindsets</h2>
             <p style="margin-bottom: 2rem;">More than a process—it's a way of thinking</p>
             <div class="mindsets-grid">
@@ -891,8 +1000,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 10: Frameworks -->
-        <div class="slide" id="slide-10">
+        <!-- Slide 11: Frameworks -->
+        <div class="slide" id="slide-11">
             <h2>Popular Design Thinking Frameworks</h2>
             <div class="framework-grid" style="margin-top: 2rem;">
                 <div class="framework-card glass-panel">
@@ -918,8 +1027,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 11: AI + Design Thinking -->
-        <div class="slide" id="slide-11">
+        <!-- Slide 12: AI + Design Thinking -->
+        <div class="slide" id="slide-12">
             <h2>AI & Design Thinking: A New Paradigm</h2>
             <p style="margin-bottom: 2rem;">Generative AI is transforming the designer's role</p>
             <div class="ai-comparison">
@@ -955,8 +1064,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 12: LLMs as Design Assistants -->
-        <div class="slide" id="slide-12">
+        <!-- Slide 13: LLMs as Design Assistants -->
+        <div class="slide" id="slide-13">
             <h2>LLMs as Design Assistants</h2>
             <p style="margin-bottom: 2rem;">Three primary ways AI augments human creativity</p>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1000px;">
@@ -979,8 +1088,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 13: Building AI Agents with Design Thinking -->
-        <div class="slide" id="slide-13">
+        <!-- Slide 14: Building AI Agents with Design Thinking -->
+        <div class="slide" id="slide-14">
             <h2>Building AI Agents with Design Thinking</h2>
             <p style="margin-bottom: 2rem;">Apply human-centered methodology to AI development</p>
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1100px;">
@@ -1014,8 +1123,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 14: Ethics in AI Design -->
-        <div class="slide" id="slide-14">
+        <!-- Slide 15: Ethics in AI Design -->
+        <div class="slide" id="slide-15">
             <h2>Ethical Principles in AI Agent Design</h2>
             <p style="margin-bottom: 2rem;">Building AI worthy of human trust</p>
             <div class="ethics-grid">
@@ -1051,8 +1160,8 @@
             <div class="slide-footer">www.hereandnowai.com</div>
         </div>
 
-        <!-- Slide 15: Thank You / Resources -->
-        <div class="slide" id="slide-15">
+        <!-- Slide 16: Thank You / Resources -->
+        <div class="slide" id="slide-16">
             <h1>Thank You</h1>
             <p style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--accent);">
                 "Human-Centered AI for a Better Tomorrow"
@@ -1093,6 +1202,8 @@
 
     </div>
 
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         // State
         let currentSlide = 0;
@@ -1101,12 +1212,76 @@
         const currentSlideEl = document.getElementById('currentSlide');
         const totalSlidesEl = document.getElementById('totalSlides');
         const totalSlides = slides.length;
+        let player = null;
+        let videoPlaying = false;
 
         // Update total slides display
         totalSlidesEl.textContent = totalSlides;
 
+        // YouTube API Ready callback
+        function onYouTubeIframeAPIReady() {
+            // API is ready, player will be created when play button is clicked
+        }
+
+        // Play video function
+        function playVideo() {
+            const thumbnail = document.getElementById('videoThumbnail');
+            const playBtn = document.getElementById('customPlayBtn');
+            const videoContainer = document.getElementById('videoContainer');
+
+            // Hide thumbnail and play button
+            thumbnail.style.display = 'none';
+            playBtn.classList.add('hidden');
+            videoContainer.classList.add('active');
+
+            // Create YouTube player
+            player = new YT.Player('videoContainer', {
+                videoId: 'gnWj97CEjeo',
+                playerVars: {
+                    'rel': 0,
+                    'modestbranding': 1,
+                    'autoplay': 1
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+
+            videoPlaying = true;
+        }
+
+        // Handle video state changes
+        function onPlayerStateChange(event) {
+            // YT.PlayerState.ENDED = 0
+            if (event.data === 0) {
+                videoPlaying = false;
+                // Video ended, advance to next slide
+                changeSlide(1);
+            }
+        }
+
+        // Reset video when leaving slide 2
+        function resetVideoSlide() {
+            const thumbnail = document.getElementById('videoThumbnail');
+            const playBtn = document.getElementById('customPlayBtn');
+            const videoContainer = document.getElementById('videoContainer');
+
+            if (player && typeof player.destroy === 'function') {
+                player.destroy();
+                player = null;
+            }
+
+            thumbnail.style.display = 'flex';
+            playBtn.classList.remove('hidden');
+            videoContainer.classList.remove('active');
+            videoContainer.innerHTML = '';
+            videoPlaying = false;
+        }
+
         // Functions
         function updateSlide() {
+            const previousSlide = currentSlide;
+            
             slides.forEach((slide, index) => {
                 if (index === currentSlide) {
                     slide.classList.add('active');
@@ -1114,6 +1289,11 @@
                     slide.classList.remove('active');
                 }
             });
+            
+            // Reset video if leaving slide 2 (index 1)
+            if (previousSlide === 1 && currentSlide !== 1) {
+                resetVideoSlide();
+            }
             
             // Update Progress Bar
             const progress = ((currentSlide + 1) / totalSlides) * 100;
