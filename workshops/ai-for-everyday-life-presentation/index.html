@@ -1481,11 +1481,6 @@
             if (homeBtn) {
                 homeBtn.style.display = (currentSlide === 0) ? 'none' : 'flex';
             }
-            // Show/hide Home button (hide on first slide)
-            const homeBtn = document.getElementById('homeBtn');
-            if (homeBtn) {
-                homeBtn.style.display = (currentSlide === 0) ? 'none' : 'flex';
-            }
             // Persist current slide so refresh keeps user's place
             try { sessionStorage.setItem('presentation-currentSlide', String(currentSlide)); } catch(e) {}
             // Update URL without adding history entry
