@@ -248,6 +248,57 @@
             box-shadow: 0 8px 30px rgba(56,189,248,0.06), 0 0 18px rgba(56,189,248,0.05);
             border-color: rgba(56,189,248,0.10);
         }
+        
+        /* Per-accent colored glow (uses :has to detect child accent markers). Modern browsers support :has; fallback uses generic glow above. */
+        .glass-panel:has(.text-cyan-300):hover,
+        button.glass-panel:has(.text-cyan-300):hover,
+        a.glass-panel:has(.text-cyan-300):hover,
+        .glass-panel:has(.bg-cyan-500):hover {
+            box-shadow: 0 12px 40px rgba(34,211,238,0.14), 0 0 36px rgba(34,211,238,0.08);
+            border-color: rgba(34,211,238,0.18);
+        }
+
+        .glass-panel:has(.text-emerald-300):hover,
+        button.glass-panel:has(.text-emerald-300):hover,
+        .glass-panel:has(.bg-emerald-500):hover {
+            box-shadow: 0 12px 40px rgba(16,185,129,0.14), 0 0 36px rgba(16,185,129,0.08);
+            border-color: rgba(16,185,129,0.18);
+        }
+
+        .glass-panel:has(.text-blue-300):hover,
+        button.glass-panel:has(.text-blue-300):hover,
+        .glass-panel:has(.bg-blue-500):hover {
+            box-shadow: 0 12px 40px rgba(56,189,248,0.14), 0 0 36px rgba(56,189,248,0.08);
+            border-color: rgba(56,189,248,0.18);
+        }
+
+        .glass-panel:has(.text-purple-300):hover,
+        button.glass-panel:has(.text-purple-300):hover,
+        .glass-panel:has(.bg-purple-500):hover {
+            box-shadow: 0 12px 40px rgba(168,85,247,0.12), 0 0 36px rgba(168,85,247,0.06);
+            border-color: rgba(168,85,247,0.16);
+        }
+
+        .glass-panel:has(.text-pink-300):hover,
+        button.glass-panel:has(.text-pink-300):hover,
+        .glass-panel:has(.bg-pink-500):hover {
+            box-shadow: 0 12px 40px rgba(236,72,153,0.12), 0 0 36px rgba(236,72,153,0.06);
+            border-color: rgba(236,72,153,0.16);
+        }
+
+        .glass-panel:has(.text-orange-300):hover,
+        button.glass-panel:has(.text-orange-300):hover,
+        .glass-panel:has(.bg-orange-500):hover {
+            box-shadow: 0 12px 40px rgba(251,146,60,0.12), 0 0 36px rgba(251,146,60,0.06);
+            border-color: rgba(251,146,60,0.16);
+        }
+
+        .glass-panel:has(.text-green-300):hover,
+        button.glass-panel:has(.text-green-300):hover,
+        .glass-panel:has(.bg-green-500):hover {
+            box-shadow: 0 12px 40px rgba(74,222,128,0.12), 0 0 36px rgba(74,222,128,0.06);
+            border-color: rgba(74,222,128,0.16);
+        }
         .game-option.correct {
             background: rgba(74, 222, 128, 0.2);
             border-color: rgba(74, 222, 128, 0.5);
