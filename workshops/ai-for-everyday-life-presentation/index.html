@@ -63,6 +63,20 @@
             transition: width 0.3s ease;
             z-index: 10;
         }
+        .slide-counter {
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 60;
+            background: rgba(2,6,23,0.6);
+            color: #cbd5e1;
+            padding: 0.35rem 0.6rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(56,189,248,0.12);
+            backdrop-filter: blur(6px);
+        }
         .nav-btn {
             position: absolute;
             top: 50%;
@@ -104,6 +118,137 @@
             .nav-btn, .progress-bar { display: none; }
             .slide { display: block; page-break-after: always; position: relative; height: auto; }
         }
+
+        /* Interactive Modal Styles */
+        .concept-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay-dark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content-large {
+            position: relative;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid rgba(56, 189, 248, 0.3);
+            border-radius: 1.5rem;
+            max-width: 90vw;
+            max-height: 85vh;
+            width: 1000px;
+            overflow-y: auto;
+            z-index: 1001;
+            box-shadow: 0 0 50px rgba(56, 189, 248, 0.3);
+        }
+        .modal-close-btn {
+            position: sticky;
+            top: 1rem;
+            right: 1rem;
+            float: right;
+            background: rgba(239, 68, 68, 0.8);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1002;
+            transition: all 0.3s;
+        }
+        .modal-close-btn:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: rotate(90deg);
+        }
+        .concept-modal-body {
+            padding: 2rem;
+            clear: both;
+        }
+        .concept-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+        }
+        .game-container {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        .game-option {
+            background: rgba(56, 189, 248, 0.1);
+            border: 2px solid rgba(56, 189, 248, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .game-option:hover {
+            background: rgba(56, 189, 248, 0.2);
+            transform: translateX(5px);
+        }
+        .game-option.correct {
+            background: rgba(74, 222, 128, 0.2);
+            border-color: rgba(74, 222, 128, 0.5);
+        }
+        .game-option.wrong {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+        .neural-network {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        .neural-layer {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .neuron {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.3);
+            border: 2px solid #38bdf8;
+            animation: neuronPulse 2s infinite;
+        }
+        @keyframes neuronPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.8); }
+        }
     </style>
 </head>
 <body>
@@ -125,6 +270,7 @@
     <button class="nav-btn nav-prev" onclick="changeSlide(-1)"><i data-lucide="chevron-left"></i></button>
     <button class="nav-btn nav-next" onclick="changeSlide(1)"><i data-lucide="chevron-right"></i></button>
     <div class="progress-bar" id="progressBar"></div>
+    <div id="slideCounter" class="slide-counter" aria-hidden="false">1 / 1</div>
 
     <!-- Slide 1: Title Slide -->
     <div class="slide active" id="slide-1">
@@ -144,204 +290,127 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 2: Our History -->
+    <!-- Slide 2: Interactive Learning -->
     <div class="slide" id="slide-2">
-        <h2 class="text-4xl font-bold mb-12 accent-text">The Journey: From Languages to Agents</h2>
-        <div class="relative w-full max-w-4xl h-64 flex items-center justify-between px-10">
-            <!-- Connecting Line -->
-            <div class="absolute top-1/2 left-10 right-10 h-1 bg-gradient-to-r from-slate-700 via-blue-500 to-slate-700 transform -translate-y-1/2 z-0"></div>
-            
-            <!-- Point 1 -->
-            <div class="relative z-10 text-center">
-                <div class="w-6 h-6 bg-blue-500 rounded-full mx-auto mb-4 shadow-[0_0_15px_rgba(56,189,248,0.8)]"></div>
-                <div class="glass-panel p-6 w-64">
-                    <h3 class="text-3xl font-bold mb-1">2011</h3>
-                    <p class="text-sm text-slate-300">HERE AND NOW<br>Research Institute Founded</p>
+        <h2 class="text-4xl font-bold mb-6 accent-text">Understanding the Basics</h2>
+        <p class="text-slate-400 mb-8 text-center">🎮 Click on each concept to learn and test your knowledge!</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl w-full px-4">
+            <!-- Intelligence Card -->
+            <button onclick="openConceptModal('intelligence')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]">
+                <div class="bg-cyan-500 p-4 rounded-full animate-pulse"><i data-lucide="lightbulb" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-cyan-300 block mb-2">Intelligence</span>
+                    <span class="text-xs text-slate-400">Foundation of AI</span>
                 </div>
-            </div>
+                <div class="text-2xl">💡</div>
+            </button>
 
-            <!-- Point 2 -->
-            <div class="relative z-10 text-center">
-                <div class="w-6 h-6 bg-blue-500 rounded-full mx-auto mb-4 shadow-[0_0_15px_rgba(56,189,248,0.8)]"></div>
-                <div class="glass-panel p-6 w-64">
-                    <h3 class="text-3xl font-bold mb-1">2018</h3>
-                    <p class="text-sm text-slate-300">HERE AND NOW AI<br>Evolution into AI</p>
+            <!-- Natural Intelligence Card -->
+            <button onclick="openConceptModal('natural')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)]">
+                <div class="bg-emerald-500 p-4 rounded-full animate-pulse" style="animation-delay: 0.15s;"><i data-lucide="user" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-emerald-300 block mb-2">Natural Intelligence</span>
+                    <span class="text-xs text-slate-400">Human Intelligence</span>
                 </div>
-            </div>
+                <div class="text-2xl">👤</div>
+            </button>
+
+            <!-- AI Card -->
+            <button onclick="openConceptModal('ai')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-blue-400 hover:shadow-[0_0_20px_rgba(56,189,248,0.4)]">
+                <div class="bg-blue-500 p-4 rounded-full animate-pulse" style="animation-delay: 0.3s;"><i data-lucide="brain" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-blue-300 block mb-2">Artificial Intelligence</span>
+                    <span class="text-xs text-slate-400">Machine Intelligence</span>
+                </div>
+                <div class="text-2xl">🤖</div>
+            </button>
+
+            <!-- ML Card -->
+            <button onclick="openConceptModal('ml')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                <div class="bg-purple-500 p-4 rounded-full animate-pulse" style="animation-delay: 0.45s;"><i data-lucide="database" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-purple-300 block mb-2">Machine Learning</span>
+                    <span class="text-xs text-slate-400">Learning from Data</span>
+                </div>
+                <div class="text-2xl">📊</div>
+            </button>
+
+            <!-- DL Card -->
+            <button onclick="openConceptModal('dl')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-pink-400 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)]">
+                <div class="bg-pink-500 p-4 rounded-full animate-pulse" style="animation-delay: 0.6s;"><i data-lucide="network" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-pink-300 block mb-2">Deep Learning</span>
+                    <span class="text-xs text-slate-400">Neural Networks</span>
+                </div>
+                <div class="text-2xl">🧠</div>
+            </button>
+
+            <!-- GenAI Card -->
+            <button onclick="openConceptModal('genai')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-orange-400 hover:shadow-[0_0_20px_rgba(251,146,60,0.4)]">
+                <div class="bg-orange-500 p-4 rounded-full animate-pulse" style="animation-delay: 0.75s;"><i data-lucide="sparkles" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-orange-300 block mb-2">Generative AI</span>
+                    <span class="text-xs text-slate-400">Content Creation</span>
+                </div>
+                <div class="text-2xl">✨</div>
+            </button>
         </div>
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 3: Leadership Team -->
+    <!-- NEW Slide 2b: AI Agents & MCP -->
+    <div class="slide" id="slide-2b">
+        <h2 class="text-4xl font-bold mb-6 accent-text">AI Agents & Model Context Protocol</h2>
+        <p class="text-slate-400 mb-8 text-center">🔗 Understanding Autonomous AI Systems</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full px-4">
+            <!-- Agent Card -->
+            <button onclick="openConceptModal('agent')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-slate-400 hover:shadow-[0_0_20px_rgba(148,163,184,0.4)]">
+                <div class="bg-slate-500 p-4 rounded-full animate-pulse"><i data-lucide="user-cog" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-slate-300 block mb-2">Agent</span>
+                    <span class="text-xs text-slate-400">Task Executor</span>
+                </div>
+                <div class="text-2xl">⚙️</div>
+            </button>
+
+            <!-- AI Agent Card -->
+            <button onclick="openConceptModal('aiagent')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-green-400 hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]">
+                <div class="bg-green-500 p-4 rounded-full animate-pulse" style="animation-delay: 0.3s;"><i data-lucide="bot" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-green-300 block mb-2">AI Agent</span>
+                    <span class="text-xs text-slate-400">Autonomous AI</span>
+                </div>
+                <div class="text-2xl">🤖🔧</div>
+            </button>
+
+            <!-- MCP Card -->
+            <button onclick="openConceptModal('mcp')" class="glass-panel p-6 flex flex-col items-center gap-4 hover:scale-105 transition-all duration-300 cursor-pointer hover:border-violet-400 hover:shadow-[0_0_20px_rgba(139,92,246,0.4)]">
+                <div class="bg-violet-500 p-4 rounded-full animate-pulse" style="animation-delay: 0.6s;"><i data-lucide="link" class="text-white" size="32"></i></div>
+                <div class="text-center">
+                    <span class="font-bold text-xl text-violet-300 block mb-2">MCP</span>
+                    <span class="text-xs text-slate-400">Model Context Protocol</span>
+                </div>
+                <div class="text-2xl">🔗</div>
+            </button>
+        </div>
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Interactive Modal for Concepts -->
+    <div id="conceptModal" class="concept-modal" style="display: none;">
+        <div class="modal-overlay-dark" onclick="closeConceptModal()"></div>
+        <div class="modal-content-large">
+            <button class="modal-close-btn" onclick="closeConceptModal()">
+                <span>&times;</span>
+            </button>
+            <div id="conceptModalBody" class="concept-modal-body">
+                <!-- Content will be dynamically inserted -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Setup -->
     <div class="slide" id="slide-3">
-        <h2 class="text-4xl font-bold mb-12">Who are we?</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl px-4">
-            <!-- Ruthran -->
-            <div class="glass-panel p-6 text-center transform hover:scale-105 transition duration-300">
-                <div class="w-32 h-32 bg-slate-700 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-blue-400 overflow-hidden">
-                    <img src="../../assets/images/Ruthran Raghavan, CEO & Chief AI Scientist.jpeg" alt="Ruthran Raghavan" class="w-full h-full object-cover">
-                </div>
-                <h3 class="text-xl font-bold accent-text">Ruthran Raghavan</h3>
-                <p class="text-sm font-semibold mb-4">CEO & Chief AI Scientist</p>
-                <p class="italic text-slate-400 text-sm">"Leading with Vision, Purpose & Passion"</p>
-            </div>
-            
-            <!-- Deepti -->
-            <div class="glass-panel p-6 text-center transform hover:scale-105 transition duration-300">
-                <div class="w-32 h-32 bg-slate-700 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-blue-400 overflow-hidden">
-                    <img src="../../assets/images/Deepti Balagopal, COO.jpeg" alt="Deepti Balagopal" class="w-full h-full object-cover">
-                </div>
-                <h3 class="text-xl font-bold accent-text">Deepti Balagopal</h3>
-                <p class="text-sm font-semibold mb-4">COO</p>
-                <p class="italic text-slate-400 text-sm">"Collaboration Fuels Success"</p>
-            </div>
-
-            <!-- Balaji -->
-            <div class="glass-panel p-6 text-center transform hover:scale-105 transition duration-300">
-                <div class="w-32 h-32 bg-slate-700 rounded-full mx-auto mb-4 flex items-center justify-center border-2 border-blue-400 overflow-hidden">
-                    <img src="../../assets/images/Balaji Kamalakkannan, CTO.jpeg" alt="Balaji Kamalakkannan" class="w-full h-full object-cover">
-                </div>
-                <h3 class="text-xl font-bold accent-text">Balaji Kamalakkannan</h3>
-                <p class="text-sm font-semibold mb-4">CTO</p>
-                <p class="italic text-slate-400 text-sm">"Innovate to Lead, Code to Change"</p>
-            </div>
-        </div>
-        <div class="slide-footer">www.hereandnowai.com</div>
-    </div>
-
-    <!-- Slide 4: First Milestone -->
-    <div class="slide" id="slide-4">
-        <div class="flex flex-col items-center max-w-4xl">
-            <h2 class="text-6xl font-bold mb-6 text-slate-600">2018</h2>
-            <h3 class="text-4xl font-bold mb-10 accent-text">The First AI Model We Built</h3>
-            
-            <div class="glass-panel p-10 w-full text-center border-t-4 border-blue-500">
-                <div class="mb-6">
-                    <span class="text-slate-400 uppercase tracking-widest text-sm">Project Name</span>
-                    <h1 class="text-5xl font-bold mt-2 text-white">Caramel AI</h1>
-                </div>
-                
-                <div class="flex justify-center gap-6 my-8">
-                    <div class="flex flex-col items-center px-4 py-3 bg-slate-800 rounded-lg border border-slate-600 hover:scale-105 transition duration-300">
-                        <img src="assets/images/gpt-2.jpeg" alt="GPT-2" class="w-20 h-20 object-cover rounded mb-2">
-                        <span class="text-sm font-semibold">GPT-2 Model</span>
-                    </div>
-                    <div class="flex flex-col items-center px-4 py-3 bg-slate-800 rounded-lg border border-slate-600 hover:scale-105 transition duration-300">
-                        <img src="assets/images/IBM-Watson.png" alt="IBM Watson" class="w-20 h-20 object-contain bg-white rounded p-1 mb-2">
-                        <span class="text-sm font-semibold">IBM Watson</span>
-                    </div>
-                </div>
-                
-                <p class="text-slate-300 italic">
-                    "This marked the beginning of our transition from data science to Generative AI."
-                </p>
-            </div>
-        </div>
-        <div class="slide-footer">www.hereandnowai.com</div>
-    </div>
-
-    <!-- Slide 5: Evolution -->
-    <div class="slide" id="slide-5">
-        <h2 class="text-4xl font-bold mb-4 accent-text">Since 2012: The AI Automation Era</h2>
-        <p class="text-xl mb-12 text-slate-300">Our Unconscious AI Journey (2011-2018)</p>
-        
-        <div class="flex flex-wrap justify-center items-center gap-4 max-w-5xl">
-            <div class="glass-panel px-6 py-4 font-bold">Data</div>
-            <i data-lucide="arrow-right" class="text-blue-400"></i>
-            <div class="glass-panel px-6 py-4 font-bold">Data Science</div>
-            <i data-lucide="arrow-right" class="text-blue-400"></i>
-            <div class="glass-panel px-6 py-4 font-bold">SPSS</div>
-            <i data-lucide="arrow-right" class="text-blue-400"></i>
-            <div class="glass-panel px-6 py-4 font-bold">Python</div>
-            <i data-lucide="arrow-right" class="text-blue-400"></i>
-            <div class="glass-panel px-6 py-4 font-bold bg-blue-900 border-blue-500 text-white shadow-[0_0_15px_rgba(56,189,248,0.5)]">Machine Learning</div>
-        </div>
-        <div class="slide-footer">www.hereandnowai.com</div>
-    </div>
-
-    <!-- Slide 6: Agentic Era -->
-    <div class="slide" id="slide-6">
-        <h2 class="text-4xl font-bold mb-2">Since 2024: Building AI Agents</h2>
-        <h3 class="text-xl text-blue-400 mb-12 tracking-widest uppercase">The Superpower of Automation</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-4xl">
-            <!-- Human -->
-            <div class="glass-panel p-8 border-l-4 border-red-400 opacity-70">
-                <div class="flex items-center gap-4 mb-4">
-                    <i data-lucide="user" size="32"></i>
-                    <h4 class="text-2xl font-bold">Human</h4>
-                </div>
-                <div class="text-lg">
-                    Task X <i data-lucide="arrow-right" class="inline mx-2 w-4"></i> Output Y
-                </div>
-                <div class="mt-4 text-3xl font-bold text-red-400">2 Days</div>
-            </div>
-
-            <!-- AI Agent -->
-            <div class="glass-panel p-8 border-l-4 border-green-400 shadow-[0_0_20px_rgba(74,222,128,0.2)]">
-                <div class="flex items-center gap-4 mb-4">
-                    <i data-lucide="bot" size="32" class="text-green-400"></i>
-                    <h4 class="text-2xl font-bold text-green-400">AI Agent</h4>
-                </div>
-                <div class="text-lg">
-                    Task X <i data-lucide="arrow-right" class="inline mx-2 w-4"></i> Output Y
-                </div>
-                <div class="mt-4 text-3xl font-bold text-green-400">2 Minutes</div>
-            </div>
-        </div>
-        
-        <div class="mt-12 text-center">
-            <p class="text-slate-400">Current Scale</p>
-            <p class="text-2xl font-bold">Building 10 AI-powered apps/agents per day</p>
-        </div>
-        <div class="slide-footer">www.hereandnowai.com</div>
-    </div>
-
-    <!-- Slide 7: Jargon -->
-    <div class="slide" id="slide-7">
-        <h2 class="text-4xl font-bold mb-10 accent-text">Understanding the Basics</h2>
-        <div class="grid grid-cols-1 gap-4 max-w-3xl w-full">
-            <div class="glass-panel p-4 flex items-center gap-4">
-                <div class="bg-blue-500 p-2 rounded"><i data-lucide="brain" class="text-white"></i></div>
-                <div>
-                    <span class="font-bold text-lg text-blue-300">AI (Artificial Intelligence)</span>
-                    <p class="text-sm text-slate-300">The umbrella term for machines mimicking human intelligence.</p>
-                </div>
-            </div>
-            <div class="glass-panel p-4 flex items-center gap-4">
-                <div class="bg-purple-500 p-2 rounded"><i data-lucide="database" class="text-white"></i></div>
-                <div>
-                    <span class="font-bold text-lg text-purple-300">ML (Machine Learning)</span>
-                    <p class="text-sm text-slate-300">Computers learning from data without being explicitly programmed.</p>
-                </div>
-            </div>
-            <div class="glass-panel p-4 flex items-center gap-4">
-                <div class="bg-pink-500 p-2 rounded"><i data-lucide="network" class="text-white"></i></div>
-                <div>
-                    <span class="font-bold text-lg text-pink-300">DL (Deep Learning)</span>
-                    <p class="text-sm text-slate-300">Neural networks that mimic the human brain.</p>
-                </div>
-            </div>
-            <div class="glass-panel p-4 flex items-center gap-4">
-                <div class="bg-orange-500 p-2 rounded"><i data-lucide="sparkles" class="text-white"></i></div>
-                <div>
-                    <span class="font-bold text-lg text-orange-300">GenAI (Generative AI)</span>
-                    <p class="text-sm text-slate-300">AI that creates new content (text, images, code).</p>
-                </div>
-            </div>
-            <div class="glass-panel p-4 flex items-center gap-4 border border-blue-400 shadow-[0_0_10px_rgba(56,189,248,0.3)]">
-                <div class="bg-green-500 p-2 rounded"><i data-lucide="bot" class="text-white"></i></div>
-                <div>
-                    <span class="font-bold text-lg text-green-300">AI Agent</span>
-                    <p class="text-sm text-slate-300">Autonomous systems that use tools (Context, Tools, Database) to perform tasks.</p>
-                </div>
-            </div>
-        </div>
-        <div class="slide-footer">www.hereandnowai.com</div>
-    </div>
-
-    <!-- Slide 8: Setup -->
-    <div class="slide" id="slide-8">
         <h2 class="text-4xl font-bold mb-2">Let's Get Hands-On</h2>
         <p class="text-xl text-slate-400 mb-12">Download & Login</p>
         
@@ -369,10 +438,32 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 9: Interaction Modes -->
-    <div class="slide" id="slide-9">
-        <h2 class="text-4xl font-bold mb-12 accent-text">Getting Started with ChatGPT</h2>
+    <!-- Slide 4: Interaction Modes -->
+    <div class="slide" id="slide-4">
+        <h2 class="text-4xl font-bold mb-8 accent-text">AI Tools We'll Use</h2>
         
+        <div class="flex justify-center gap-12 mb-12 max-w-5xl w-full">
+            <div class="glass-panel p-8 text-center flex-1 max-w-sm">
+                <div class="w-32 h-32 mx-auto mb-4 bg-white rounded-full flex items-center justify-center shadow-lg">
+                    <svg viewBox="0 0 320 320" class="w-24 h-24">
+                        <path fill="#10a37f" d="M297.06 130.97c7.26-21.79 4.76-45.66-6.85-65.48-17.46-30.4-52.56-46.04-86.84-38.68-15.25-17.18-37.16-26.95-60.13-26.81C120.03-.04 97.8 10.28 83.36 27.89c-18.95 0-37.59 6.71-52.36 18.95-25.08 20.67-35.95 55.12-27.36 87.09-7.16 21.79-4.76 45.66 6.85 65.48 17.46 30.4 52.56 46.04 86.84 38.68 15.24 17.18 37.16 26.95 60.13 26.8 23.21.04 45.44-9.55 59.89-25.89 18.95 0 37.59-6.71 52.36-18.95 25.08-20.66 35.95-55.11 27.36-87.08zm-150.67 88.52c-41.03 0-74.3-33.26-74.3-74.3 0-41.03 33.27-74.3 74.3-74.3 41.03 0 74.3 33.27 74.3 74.3 0 41.04-33.27 74.3-74.3 74.3z"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">ChatGPT</h3>
+                <p class="text-sm text-slate-400">Conversational AI by OpenAI</p>
+            </div>
+            <div class="glass-panel p-8 text-center flex-1 max-w-sm">
+                <div class="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                    <svg viewBox="0 0 24 24" class="w-20 h-20" fill="white">
+                        <path d="M14.8 4.613l6.701 11.161c.963 1.603.49 3.712-1.057 4.71-1.547.998-3.625.494-4.644-1.126L9.1 8.197c-.963-1.603-.49-3.712 1.057-4.71 1.547-.998 3.625-.494 4.644 1.126zm-6.9 3.632L.5 20.088c-.962 1.603-.49 3.712 1.057 4.71 1.547.998 3.625.494 4.644-1.126l7.4-11.843c.963-1.603.49-3.712-1.057-4.71-1.547-.998-3.625-.494-4.644 1.126z"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">NotebookLM</h3>
+                <p class="text-sm text-slate-400">AI Research Assistant by Google</p>
+            </div>
+        </div>
+        
+        <h3 class="text-2xl font-bold mb-6 text-slate-300">ChatGPT Interaction Modes</h3>
         <div class="grid grid-cols-3 gap-6 max-w-5xl w-full">
             <div class="glass-panel p-6 text-center">
                 <i data-lucide="message-square" size="48" class="mx-auto mb-4 text-blue-400"></i>
@@ -393,8 +484,286 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 10: Demo 1 -->
-    <div class="slide" id="slide-10">
+    <!-- Slide 4b: ChatGPT Setup & Personalization -->
+    <div class="slide" id="slide-4b">
+        <h2 class="text-4xl font-bold mb-6 accent-text">Before You Start with ChatGPT</h2>
+        
+        <div class="grid grid-cols-2 gap-6 max-w-6xl w-full">
+            <!-- Personalization Section -->
+            <div class="glass-panel p-6">
+                <h3 class="text-2xl font-bold mb-4 text-blue-400"><i data-lucide="user-cog" class="inline w-6 h-6 mr-2"></i>1. Personalization</h3>
+                
+                <div class="space-y-3">
+                    <div class="bg-slate-800/50 p-3 rounded-lg">
+                        <p class="font-bold text-sm text-purple-300 mb-1">Base Style & Tone:</p>
+                        <p class="text-xs text-slate-400">Default, Professional, Friendly, Candid, Quirky, Efficient, Nerdy, Cynical</p>
+                    </div>
+                    
+                    <div class="bg-slate-800/50 p-3 rounded-lg">
+                        <p class="font-bold text-sm text-green-300 mb-1">Custom Instructions:</p>
+                        <div class="text-xs text-slate-300 space-y-1">
+                            <p><span class="text-blue-300">• Nickname:</span> Call me "Tech Lead" or "Sarah"</p>
+                            <p><span class="text-blue-300">• Occupation:</span> Software Engineer, Teacher, Marketer</p>
+                            <p><span class="text-blue-300">• About you:</span> "I prefer concise answers with code examples"</p>
+                            <p><span class="text-blue-300">• Memory:</span> Enable for personalized experience</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interaction Modes -->
+            <div class="glass-panel p-6">
+                <h3 class="text-2xl font-bold mb-4 text-green-400"><i data-lucide="message-circle" class="inline w-6 h-6 mr-2"></i>2. Interaction Modes</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded-lg">
+                        <i data-lucide="keyboard" class="text-blue-400 w-5 h-5"></i>
+                        <div>
+                            <p class="font-bold text-sm">Text Mode</p>
+                            <p class="text-xs text-slate-400">Type your questions</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded-lg">
+                        <i data-lucide="mic" class="text-purple-400 w-5 h-5"></i>
+                        <div>
+                            <p class="font-bold text-sm">Dictate Mode</p>
+                            <p class="text-xs text-slate-400">Speak and convert to text</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 bg-green-900/30 p-3 rounded-lg border border-green-500/50">
+                        <i data-lucide="phone" class="text-green-400 w-5 h-5"></i>
+                        <div>
+                            <p class="font-bold text-sm">Voice Mode</p>
+                            <p class="text-xs text-slate-400">Real-time conversation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 4c: Basic Prompting Examples -->
+    <div class="slide" id="slide-4c">
+        <h2 class="text-4xl font-bold mb-6 accent-text">Getting Started with Basic Prompting</h2>
+        <p class="text-slate-400 mb-8 text-lg">No prompt engineering needed - just ask naturally!</p>
+        
+        <div class="grid grid-cols-2 gap-6 max-w-6xl w-full">
+            <div class="glass-panel p-6 bg-blue-900/20 border-l-4 border-blue-500">
+                <div class="flex items-start gap-3 mb-3">
+                    <i data-lucide="lightbulb" class="text-yellow-400 w-6 h-6"></i>
+                    <p class="font-mono text-sm text-slate-200">"Explain quantum computing in simple terms"</p>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-6 bg-purple-900/20 border-l-4 border-purple-500">
+                <div class="flex items-start gap-3 mb-3">
+                    <i data-lucide="code" class="text-green-400 w-6 h-6"></i>
+                    <p class="font-mono text-sm text-slate-200">"Write a Python function to calculate fibonacci"</p>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-6 bg-green-900/20 border-l-4 border-green-500">
+                <div class="flex items-start gap-3 mb-3">
+                    <i data-lucide="mail" class="text-blue-400 w-6 h-6"></i>
+                    <p class="font-mono text-sm text-slate-200">"Draft a professional email to reschedule a meeting"</p>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-6 bg-orange-900/20 border-l-4 border-orange-500">
+                <div class="flex items-start gap-3 mb-3">
+                    <i data-lucide="book-open" class="text-purple-400 w-6 h-6"></i>
+                    <p class="font-mono text-sm text-slate-200">"Summarize the key points of this article: [paste text]"</p>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-6 bg-pink-900/20 border-l-4 border-pink-500">
+                <div class="flex items-start gap-3 mb-3">
+                    <i data-lucide="brain" class="text-pink-400 w-6 h-6"></i>
+                    <p class="font-mono text-sm text-slate-200">"Help me brainstorm ideas for a birthday party"</p>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-6 bg-cyan-900/20 border-l-4 border-cyan-500">
+                <div class="flex items-start gap-3 mb-3">
+                    <i data-lucide="trending-up" class="text-cyan-400 w-6 h-6"></i>
+                    <p class="font-mono text-sm text-slate-200">"Create a study plan for learning Spanish in 3 months"</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 4d: Prompt Engineering -->
+    <div class="slide" id="slide-4d">
+        <h2 class="text-4xl font-bold mb-4 accent-text">Prompt Engineering</h2>
+        <p class="text-xl text-slate-300 mb-8">The art of crafting effective prompts to get better AI responses</p>
+        
+        <div class="glass-panel p-8 max-w-5xl w-full">
+            <div class="space-y-4">
+                <!-- Role -->
+                <div class="flex items-start gap-4 p-4 bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
+                    <div class="bg-blue-600 text-white px-3 py-1 rounded font-bold text-sm">1</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg text-blue-300 mb-2">Role Assignment</h3>
+                        <p class="text-sm text-slate-300 mb-2">Define who the AI should be</p>
+                        <div class="bg-slate-800 p-3 rounded text-xs font-mono text-green-300">
+                            "You are an expert teacher" | "Act as a senior developer" | "You are a marketing consultant"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task -->
+                <div class="flex items-start gap-4 p-4 bg-purple-900/20 rounded-lg border-l-4 border-purple-500">
+                    <div class="bg-purple-600 text-white px-3 py-1 rounded font-bold text-sm">2</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg text-purple-300 mb-2">Define the Task</h3>
+                        <p class="text-sm text-slate-300 mb-2">Be specific about what you want</p>
+                        <div class="bg-slate-800 p-3 rounded text-xs font-mono text-green-300">
+                            "Create a presentation" | "Write a report" | "Debug this code" | "Analyze data"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Context -->
+                <div class="flex items-start gap-4 p-4 bg-green-900/20 rounded-lg border-l-4 border-green-500">
+                    <div class="bg-green-600 text-white px-3 py-1 rounded font-bold text-sm">3</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg text-green-300 mb-2">Provide Context</h3>
+                        <p class="text-sm text-slate-300 mb-2">Give background information</p>
+                        <div class="bg-slate-800 p-3 rounded text-xs font-mono text-green-300">
+                            "For a beginner audience" | "This is for enterprise clients" | "Using Python 3.11"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Format -->
+                <div class="flex items-start gap-4 p-4 bg-orange-900/20 rounded-lg border-l-4 border-orange-500">
+                    <div class="bg-orange-600 text-white px-3 py-1 rounded font-bold text-sm">4</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg text-orange-300 mb-2">Expected Format</h3>
+                        <p class="text-sm text-slate-300 mb-2">Specify output structure</p>
+                        <div class="bg-slate-800 p-3 rounded text-xs font-mono text-green-300">
+                            "In bullet points" | "As a table" | "Step-by-step guide" | "JSON format"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Constraints -->
+                <div class="flex items-start gap-4 p-4 bg-pink-900/20 rounded-lg border-l-4 border-pink-500">
+                    <div class="bg-pink-600 text-white px-3 py-1 rounded font-bold text-sm">5</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg text-pink-300 mb-2">Constraints</h3>
+                        <p class="text-sm text-slate-300 mb-2">Set boundaries and limits</p>
+                        <div class="bg-slate-800 p-3 rounded text-xs font-mono text-green-300">
+                            "Under 200 words" | "No jargon" | "Use only free tools" | "Complete in 5 steps"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 4e: NotebookLM Introduction -->
+    <div class="slide" id="slide-4e">
+        <h2 class="text-4xl font-bold mb-6 accent-text">NotebookLM: Your AI Research Assistant</h2>
+        
+        <div class="grid grid-cols-2 gap-6 max-w-6xl w-full">
+            <!-- Left: Features -->
+            <div class="glass-panel p-6">
+                <h3 class="text-2xl font-bold mb-4 text-purple-400"><i data-lucide="sparkles" class="inline w-6 h-6 mr-2"></i>Key Features</h3>
+                
+                <div class="space-y-3">
+                    <div class="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                        <i data-lucide="file-plus" class="text-blue-400 w-5 h-5 mt-1"></i>
+                        <div>
+                            <p class="font-bold text-sm mb-1">Add Sources</p>
+                            <p class="text-xs text-slate-400">Upload files, websites, YouTube, notes</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                        <i data-lucide="search" class="text-green-400 w-5 h-5 mt-1"></i>
+                        <div>
+                            <p class="font-bold text-sm mb-1">Discover Sources</p>
+                            <p class="text-xs text-slate-400">AI suggests relevant materials</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                        <i data-lucide="zap" class="text-yellow-400 w-5 h-5 mt-1"></i>
+                        <div>
+                            <p class="font-bold text-sm mb-1">Fast Research</p>
+                            <p class="text-xs text-slate-400">Quick summaries & insights</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg">
+                        <i data-lucide="microscope" class="text-purple-400 w-5 h-5 mt-1"></i>
+                        <div>
+                            <p class="font-bold text-sm mb-1">Deep Research</p>
+                            <p class="text-xs text-slate-400">Comprehensive analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Source Types & Outputs -->
+            <div class="space-y-4">
+                <div class="glass-panel p-6">
+                    <h3 class="text-xl font-bold mb-3 text-blue-400">Source Types</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-800/50 p-2 rounded text-center text-sm">
+                            <i data-lucide="file-text" class="inline w-4 h-4 text-blue-400"></i> Files (PDF, Docs)
+                        </div>
+                        <div class="bg-slate-800/50 p-2 rounded text-center text-sm">
+                            <i data-lucide="globe" class="inline w-4 h-4 text-green-400"></i> Websites
+                        </div>
+                        <div class="bg-slate-800/50 p-2 rounded text-center text-sm">
+                            <i data-lucide="youtube" class="inline w-4 h-4 text-red-400"></i> YouTube Videos
+                        </div>
+                        <div class="bg-slate-800/50 p-2 rounded text-center text-sm">
+                            <i data-lucide="sticky-note" class="inline w-4 h-4 text-yellow-400"></i> Notes
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-panel p-6">
+                    <h3 class="text-xl font-bold mb-3 text-green-400">Output Types</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center gap-2 bg-slate-800/50 p-2 rounded">
+                            <i data-lucide="file-check" class="text-blue-400 w-4 h-4"></i>
+                            <span>Summaries & Briefing Docs</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-800/50 p-2 rounded">
+                            <i data-lucide="list" class="text-purple-400 w-4 h-4"></i>
+                            <span>Study Guides & FAQs</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-800/50 p-2 rounded">
+                            <i data-lucide="presentation" class="text-orange-400 w-4 h-4"></i>
+                            <span>Timelines & Tables</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-800/50 p-2 rounded">
+                            <i data-lucide="headphones" class="text-green-400 w-4 h-4"></i>
+                            <span>Audio Overviews (Podcasts)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6 p-4 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/30 max-w-6xl">
+            <p class="text-center text-slate-300"><i data-lucide="info" class="inline w-5 h-5 text-blue-400"></i> <span class="font-bold">Pro Tip:</span> NotebookLM creates grounded responses based only on your sources - no hallucinations!</p>
+        </div>
+        
+        <div class="slide-footer">www.hereandnowai.com</div>
+    </div>
+
+    <!-- Slide 5: Demo 1 -->
+    <div class="slide" id="slide-5">
         <div class="absolute top-10 right-10 text-slate-600 font-bold text-6xl opacity-20">01</div>
         <h2 class="text-4xl font-bold mb-8 text-blue-400">Scenario 1: Chat Mode</h2>
         <h3 class="text-2xl mb-12">Task: Fact Retrieval</h3>
@@ -402,7 +771,7 @@
         <div class="glass-panel p-10 max-w-3xl w-full text-center">
             <p class="text-lg text-slate-400 mb-2">The Prompt</p>
             <div class="bg-slate-800 p-6 rounded-xl border-2 border-slate-600 text-2xl font-mono text-white shadow-inner">
-                "Who is the CEO of Canara Bank?"
+                "Who is the CEO of HERE AND NOW AI?"
             </div>
             <div class="mt-8 flex items-center justify-center gap-2 text-green-400">
                 <i data-lucide="check-circle"></i>
@@ -412,8 +781,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 11: Demo 2 -->
-    <div class="slide" id="slide-11">
+    <!-- Slide 6: Demo 2 -->
+    <div class="slide" id="slide-6">
         <div class="absolute top-10 right-10 text-slate-600 font-bold text-6xl opacity-20">02</div>
         <h2 class="text-4xl font-bold mb-8 text-purple-400">Scenario 2: Dictate Mode</h2>
         <h3 class="text-2xl mb-12">Task: Follow-up Context</h3>
@@ -423,25 +792,25 @@
                 <div class="flex items-start gap-4">
                     <div class="bg-purple-500 p-2 rounded-full"><i data-lucide="mic" class="text-white w-4 h-4"></i></div>
                     <div class="bg-slate-800 p-4 rounded-xl text-lg font-mono w-full">
-                        "Who founded the bank?"
+                        "Who founded the company?"
                     </div>
                 </div>
                 <div class="flex items-start gap-4">
                     <div class="bg-purple-500 p-2 rounded-full"><i data-lucide="mic" class="text-white w-4 h-4"></i></div>
                     <div class="bg-slate-800 p-4 rounded-xl text-lg font-mono w-full">
-                        "When was he born?"
+                        "What services do they offer?"
                     </div>
                 </div>
              </div>
              <div class="mt-8 p-4 bg-blue-900/30 border border-blue-500/50 rounded-lg text-center">
-                <span class="font-bold text-blue-300">Key Learning:</span> The AI remembers "the bank" is Canara Bank.
+                <span class="font-bold text-blue-300">Key Learning:</span> The AI remembers "the company" is HERE AND NOW AI.
              </div>
         </div>
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 12: Demo 3 -->
-    <div class="slide" id="slide-12">
+    <!-- Slide 7: Demo 3 -->
+    <div class="slide" id="slide-7">
         <div class="absolute top-10 right-10 text-slate-600 font-bold text-6xl opacity-20">03</div>
         <h2 class="text-4xl font-bold mb-8 text-green-400">Scenario 3: Voice Mode</h2>
         <h3 class="text-2xl mb-8">Task: Hands-Free Productivity</h3>
@@ -452,7 +821,7 @@
             </div>
             
             <div class="glass-panel p-6 text-center w-full italic text-xl">
-                "I want to change the registered mobile number of my Canara Bank account. I need to write a letter to my bank."
+                "Write a professional email to inquire about HERE AND NOW AI's enterprise training programs for our team of 50 professionals."
             </div>
 
             <p class="mt-6 text-red-400 font-bold uppercase tracking-widest">Constraint: Do not touch the keyboard.</p>
@@ -460,8 +829,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 13: Prompt Engineering -->
-    <div class="slide" id="slide-13">
+    <!-- Slide 8: Prompt Engineering -->
+    <div class="slide" id="slide-8">
         <h2 class="text-4xl font-bold mb-8 accent-text">The Art of Prompting</h2>
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 w-full max-w-6xl">
             <!-- Role -->
@@ -498,8 +867,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 14: Use Cases -->
-    <div class="slide" id="slide-14">
+    <!-- Slide 9: Use Cases -->
+    <div class="slide" id="slide-9">
         <h2 class="text-4xl font-bold mb-10">High-Impact Use Cases</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
             <div class="glass-panel p-6 flex items-start gap-4">
@@ -541,8 +910,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 15: Generative Visuals -->
-    <div class="slide" id="slide-15">
+    <!-- Slide 10: Generative Visuals -->
+    <div class="slide" id="slide-10">
         <h2 class="text-4xl font-bold mb-10 accent-text">Generative Visuals</h2>
         
         <div class="flex flex-col md:flex-row gap-8 items-center justify-center w-full max-w-5xl">
@@ -574,8 +943,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 16: NotebookLM -->
-    <div class="slide" id="slide-16">
+    <!-- Slide 11: NotebookLM -->
+    <div class="slide" id="slide-11">
         <h2 class="text-4xl font-bold mb-2">Your AI Researcher</h2>
         <h3 class="text-2xl text-blue-400 mb-10">Google NotebookLM</h3>
         
@@ -600,8 +969,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 17: Cutting Edge -->
-    <div class="slide" id="slide-17">
+    <!-- Slide 12: Cutting Edge -->
+    <div class="slide" id="slide-12">
         <h2 class="text-4xl font-bold mb-8 accent-text">The Cutting Edge</h2>
         
         <div class="grid grid-cols-2 gap-6 max-w-5xl w-full">
@@ -630,8 +999,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 18: Q&A -->
-    <div class="slide" id="slide-18">
+    <!-- Slide 13: Q&A -->
+    <div class="slide" id="slide-13">
         <div class="w-48 h-48 bg-blue-500 rounded-full flex items-center justify-center mb-8 shadow-[0_0_60px_rgba(59,130,246,0.5)] animate-bounce">
             <span class="text-9xl font-bold text-white">?</span>
         </div>
@@ -641,8 +1010,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 19: Conclusion -->
-    <div class="slide" id="slide-19">
+    <!-- Slide 14: Conclusion -->
+    <div class="slide" id="slide-14">
         <h2 class="text-6xl font-bold mb-8 accent-text">Thank You</h2>
         <h3 class="text-2xl italic text-slate-300 mb-12">"Innovate to Lead, Code to Change"</h3>
         
@@ -663,8 +1032,8 @@
         <div class="slide-footer">www.hereandnowai.com</div>
     </div>
 
-    <!-- Slide 20: Resources -->
-    <div class="slide" id="slide-20">
+    <!-- Slide 15: Resources -->
+    <div class="slide" id="slide-15">
         <h2 class="text-4xl font-bold mb-10">Continue Your Journey</h2>
         
         <div class="flex flex-col gap-6 max-w-2xl w-full">
@@ -704,6 +1073,7 @@
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const progressBar = document.getElementById('progressBar');
+        const slideCounter = document.getElementById('slideCounter');
         const totalSlides = slides.length;
 
         // Functions
@@ -719,6 +1089,10 @@
             const progress = ((currentSlide + 1) / totalSlides) * 100;
             progressBar.style.width = `${progress}%`;
             
+            // Update slide counter
+            if (slideCounter) {
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            }
             // Re-init icons for the new slide in case of dynamic loading (not needed here but good practice)
             lucide.createIcons();
         }
@@ -760,6 +1134,787 @@
 
         // Init
         updateSlide();
+
+        // ========== INTERACTIVE CONCEPT MODAL FUNCTIONS ==========
+        
+        function openConceptModal(concept) {
+            const modal = document.getElementById('conceptModal');
+            const modalBody = document.getElementById('conceptModalBody');
+            
+            modal.style.display = 'flex';
+            modalBody.innerHTML = getConceptContent(concept);
+            
+            // Reinitialize icons
+            lucide.createIcons();
+            
+            // Prevent slide navigation when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeConceptModal() {
+            const modal = document.getElementById('conceptModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeConceptModal();
+            }
+        });
+
+        function getConceptContent(concept) {
+            let currentQuiz = { concept: '', questionIndex: 0 };
+            const contents = {
+                'intelligence': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">💡</div>
+                        <h2 class="text-4xl font-bold text-cyan-400 mb-2">Intelligence</h2>
+                        <p class="text-slate-300 text-xl">The ability to make future predictions or decisions</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-cyan-900/20 border-2 border-cyan-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-cyan-300">📖 Definition</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed">
+                            Intelligence is the <span class="text-cyan-300 font-bold">ability to make future predictions or decisions</span>. 
+                            It's the foundation of all cognitive capabilities, whether in humans or machines.
+                        </p>
+                    </div>
+
+                    ${generateQuizHTML('intelligence', [
+                        {
+                            question: "What is the primary characteristic of intelligence?",
+                            options: [
+                                "Memorizing information",
+                                "The ability to make future predictions or decisions",
+                                "Processing speed",
+                                "Data storage capacity"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Intelligence involves:",
+                            options: [
+                                "Only solving mathematical problems",
+                                "Predicting outcomes and making choices",
+                                "Having a large database",
+                                "Running calculations quickly"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Which statement best describes intelligence?",
+                            options: [
+                                "Knowing lots of facts",
+                                "The capacity to anticipate and decide future actions",
+                                "Being able to follow instructions",
+                                "Having perfect memory"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+                `,
+                
+                'natural': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">👤</div>
+                        <h2 class="text-4xl font-bold text-emerald-400 mb-2">Natural Intelligence</h2>
+                        <p class="text-slate-300 text-xl">Human capability to predict and decide</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-emerald-900/20 border-2 border-emerald-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-emerald-300">📖 Definition</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed">
+                            <span class="text-emerald-300 font-bold">Natural Intelligence</span> is when a human is capable of 
+                            <span class="text-emerald-300 font-bold">predicting the future or deciding future actions</span>. 
+                            It's the intelligence we possess naturally through our brain and cognitive abilities.
+                        </p>
+                    </div>
+
+                    ${generateQuizHTML('natural', [
+                        {
+                            question: "What makes intelligence 'natural'?",
+                            options: [
+                                "It comes from machines",
+                                "It's possessed by humans through their brain",
+                                "It requires programming",
+                                "It's stored in databases"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Natural intelligence allows humans to:",
+                            options: [
+                                "Only remember past events",
+                                "Predict future outcomes and make decisions",
+                                "Process data faster than computers",
+                                "Store unlimited information"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "An example of natural intelligence is:",
+                            options: [
+                                "A calculator solving equations",
+                                "A person deciding what to eat based on their hunger and preferences",
+                                "A robot following programmed instructions",
+                                "A database storing information"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+                `,
+                
+                'ai': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">🤖</div>
+                        <h2 class="text-4xl font-bold text-blue-400 mb-2">Artificial Intelligence</h2>
+                        <p class="text-slate-300 text-xl">Machines with the capability to predict and decide</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-blue-900/20 border-2 border-blue-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-blue-300">📖 Definition</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed">
+                            <span class="text-blue-300 font-bold">Artificial Intelligence</span> is giving machines the 
+                            <span class="text-blue-300 font-bold">same capability of predicting the future or deciding future actions</span> 
+                            that humans naturally possess. We transfer this cognitive ability to machines.
+                        </p>
+                    </div>
+
+                    ${generateQuizHTML('ai', [
+                        {
+                            question: "What makes intelligence 'artificial'?",
+                            options: [
+                                "It's imaginary and not real",
+                                "It's given to machines instead of occurring naturally in humans",
+                                "It only works with fake data",
+                                "It cannot make predictions"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Artificial Intelligence enables machines to:",
+                            options: [
+                                "Only store and retrieve data",
+                                "Predict future outcomes and make decisions like humans",
+                                "Follow exact instructions without thinking",
+                                "Replace batteries automatically"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Which is an example of AI?",
+                            options: [
+                                "A simple calculator",
+                                "A self-driving car that decides when to stop or turn",
+                                "A digital clock",
+                                "A mechanical fan"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+                `,
+                
+                'ml': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">📊</div>
+                        <h2 class="text-4xl font-bold text-purple-400 mb-2">Machine Learning</h2>
+                        <p class="text-slate-300 text-xl">Decision-making from data, not programming</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-purple-900/20 border-2 border-purple-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-purple-300">📖 Definition</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed">
+                            <span class="text-purple-300 font-bold">Machine Learning</span> is the 
+                            <span class="text-purple-300 font-bold">decision-making ability from data, not by programming</span>. 
+                            Instead of writing explicit rules, machines learn patterns from examples and make decisions based on what they've learned.
+                        </p>
+                    </div>
+
+                    ${generateQuizHTML('ml', [
+                        {
+                            question: "How does Machine Learning work?",
+                            options: [
+                                "By following pre-written instructions exactly",
+                                "By learning patterns from data without explicit programming",
+                                "By copying human brain structure",
+                                "By using if-then-else statements"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "What's the key difference between ML and traditional programming?",
+                            options: [
+                                "ML is faster",
+                                "ML learns from data instead of following explicit rules",
+                                "ML uses more memory",
+                                "ML only works with numbers"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "An example of Machine Learning is:",
+                            options: [
+                                "A calculator adding two numbers",
+                                "Email spam filter that learns which emails are spam from examples",
+                                "A thermostat set to 72°F",
+                                "A printer following print commands"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+                `,
+                
+                'dl': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">🧠</div>
+                        <h2 class="text-4xl font-bold text-pink-400 mb-2">Deep Learning</h2>
+                        <p class="text-slate-300 text-xl">Neural networks processing raw, unprocessed data</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-pink-900/20 border-2 border-pink-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-pink-300">📖 Definition</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed">
+                            <span class="text-pink-300 font-bold">Deep Learning</span> uses 
+                            <span class="text-pink-300 font-bold">neural networks to process raw pieces of data—unprocessed data—to make decisions</span>. 
+                            It can work with images, audio, video, and text in their natural form without manual feature extraction.
+                        </p>
+                    </div>
+
+                    <div class="game-container">
+                        <h3 class="text-2xl font-bold mb-4 text-pink-300">🧠 Neural Network Visualization</h3>
+                        <div class="neural-network" style="background: rgba(0,0,0,0.3); padding: 2rem; border-radius: 1rem;">
+                            <div class="neural-layer">
+                                <div class="neuron" style="animation-delay: 0s;"></div>
+                                <div class="neuron" style="animation-delay: 0.2s;"></div>
+                                <div class="neuron" style="animation-delay: 0.4s;"></div>
+                            </div>
+                            <div class="text-4xl text-blue-400">→</div>
+                            <div class="neural-layer">
+                                <div class="neuron" style="animation-delay: 0.6s;"></div>
+                                <div class="neuron" style="animation-delay: 0.8s;"></div>
+                                <div class="neuron" style="animation-delay: 1s;"></div>
+                                <div class="neuron" style="animation-delay: 1.2s;"></div>
+                            </div>
+                            <div class="text-4xl text-blue-400">→</div>
+                            <div class="neural-layer">
+                                <div class="neuron" style="animation-delay: 1.4s;"></div>
+                                <div class="neuron" style="animation-delay: 1.6s;"></div>
+                            </div>
+                        </div>
+                        <p class="text-center mt-4 text-slate-400">Input Layer → Hidden Layers → Output Layer</p>
+                    </div>
+
+                    ${generateQuizHTML('dl', [
+                        {
+                            question: "What makes Deep Learning 'deep'?",
+                            options: [
+                                "It thinks very deeply",
+                                "It uses multiple layers of neural networks",
+                                "It processes data very slowly",
+                                "It stores data in deep databases"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Deep Learning can process:",
+                            options: [
+                                "Only numerical data",
+                                "Raw, unprocessed data like images, audio, and video",
+                                "Only text files",
+                                "Only structured databases"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "An example of Deep Learning is:",
+                            options: [
+                                "A simple decision tree",
+                                "Face recognition in photos that identifies people automatically",
+                                "A basic calculator",
+                                "A rule-based chatbot"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+                `,
+                
+                'genai': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">✨</div>
+                        <h2 class="text-4xl font-bold text-orange-400 mb-2">Generative AI</h2>
+                        <p class="text-slate-300 text-xl">Creating new content with natural language</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-orange-900/20 border-2 border-orange-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-orange-300">📖 Definition</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed">
+                            <span class="text-orange-300 font-bold">Generative AI</span> has the 
+                            <span class="text-orange-300 font-bold">ability to generate new text, images, audio, and video with natural language inputs instead of coding</span>. 
+                            You can describe what you want in plain English, and it creates it for you.
+                        </p>
+                    </div>
+
+                    ${generateQuizHTML('genai', [
+                        {
+                            question: "What can Generative AI create?",
+                            options: [
+                                "Only text documents",
+                                "Text, images, audio, and video from natural language descriptions",
+                                "Only computer code",
+                                "Only spreadsheets"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "How do you interact with Generative AI?",
+                            options: [
+                                "By writing complex code",
+                                "By using natural language (talking/typing normally)",
+                                "By drawing diagrams",
+                                "By using mathematical formulas"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Which is an example of Generative AI?",
+                            options: [
+                                "A search engine finding existing web pages",
+                                "ChatGPT writing a poem about AI or DALL-E creating a new image",
+                                "A calculator solving equations",
+                                "A database storing records"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+
+                    <div class="glass-panel p-6 mt-6 bg-orange-900/20">
+                        <h4 class="text-xl font-bold mb-3 text-orange-300">🎨 Popular GenAI Tools:</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-800/50 p-3 rounded">
+                                <p class="font-bold">ChatGPT</p>
+                                <p class="text-xs text-slate-400">Text generation</p>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded">
+                                <p class="font-bold">DALL-E</p>
+                                <p class="text-xs text-slate-400">Image creation</p>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded">
+                                <p class="font-bold">Suno AI</p>
+                                <p class="text-xs text-slate-400">Music generation</p>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded">
+                                <p class="font-bold">Runway ML</p>
+                                <p class="text-xs text-slate-400">Video generation</p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                
+                'agent': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">⚙️</div>
+                        <h2 class="text-4xl font-bold text-slate-300 mb-2">Agent (Simple Agent)</h2>
+                        <p class="text-slate-300 text-xl">A program that performs tasks following fixed rules</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-slate-800/40 border-2 border-slate-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-slate-300">📖 Definition</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed">
+                            A <span class="text-slate-300 font-bold">simple Agent</span> is a software program that performs tasks 
+                            <span class="text-slate-300 font-bold">following pre-defined rules and instructions</span>. 
+                            It can automate tasks but doesn't learn or adapt. It follows the exact logic programmed into it.
+                        </p>
+                        <div class="mt-4 p-4 bg-slate-700/30 rounded-lg">
+                            <p class="text-slate-300">
+                                <strong>Example:</strong> A thermostat agent - "If temperature > 75°F, turn on AC. If temperature < 68°F, turn on heat."
+                            </p>
+                        </div>
+                    </div>
+
+                    ${generateQuizHTML('agent', [
+                        {
+                            question: "What defines a simple agent?",
+                            options: [
+                                "It learns from experience",
+                                "It follows pre-defined rules and instructions",
+                                "It can make creative decisions",
+                                "It understands natural language"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Can a simple agent adapt to new situations?",
+                            options: [
+                                "Yes, it learns automatically",
+                                "No, it only follows its programmed rules",
+                                "Yes, if connected to the internet",
+                                "Yes, through trial and error"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "An example of a simple agent is:",
+                            options: [
+                                "ChatGPT having a conversation",
+                                "A vending machine that dispenses items when you insert coins",
+                                "A self-driving car navigating traffic",
+                                "An AI that generates artwork"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+                `,
+                
+                'aiagent': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">🤖🔧</div>
+                        <h2 class="text-4xl font-bold text-green-400 mb-2">AI Agent</h2>
+                        <p class="text-slate-300 text-xl">Autonomous AI that learns, decides, and uses tools</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-green-900/20 border-2 border-green-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-green-300">📖 Definition</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed">
+                            An <span class="text-green-300 font-bold">AI Agent</span> is an 
+                            <span class="text-green-300 font-bold">autonomous system powered by AI that can learn, reason, make decisions, and use various tools</span> 
+                            to accomplish complex tasks. Unlike simple agents, AI Agents can adapt to new situations, understand context, and improve over time.
+                        </p>
+                        <div class="mt-4 p-4 bg-green-950/30 rounded-lg">
+                            <p class="text-slate-300">
+                                <strong>Key Capabilities:</strong> Learning from data, understanding natural language, using external tools (APIs, databases, web), 
+                                planning multi-step actions, and adapting to changing conditions.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 mt-4 bg-green-900/20">
+                        <h4 class="text-xl font-bold mb-3 text-green-300">🌟 AI Agent vs Simple Agent:</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-800/50 p-4 rounded border-l-4 border-slate-500">
+                                <p class="font-bold text-slate-300 mb-2">Simple Agent</p>
+                                <ul class="text-sm text-slate-400 space-y-1">
+                                    <li>✗ Fixed rules only</li>
+                                    <li>✗ Cannot learn</li>
+                                    <li>✗ Limited adaptability</li>
+                                    <li>✗ No reasoning</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-950/30 p-4 rounded border-l-4 border-green-500">
+                                <p class="font-bold text-green-300 mb-2">AI Agent</p>
+                                <ul class="text-sm text-slate-200 space-y-1">
+                                    <li>✓ Learns from data</li>
+                                    <li>✓ Adapts to new situations</li>
+                                    <li>✓ Uses multiple tools</li>
+                                    <li>✓ Reasons and plans</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${generateQuizHTML('aiagent', [
+                        {
+                            question: "What makes an AI Agent different from a simple agent?",
+                            options: [
+                                "It's more expensive",
+                                "It can learn, adapt, and use tools autonomously",
+                                "It uses more electricity",
+                                "It has a nicer user interface"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "AI Agents can:",
+                            options: [
+                                "Only follow pre-programmed rules",
+                                "Learn from data, reason, plan, and use external tools",
+                                "Only perform calculations",
+                                "Only work offline"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "An example of an AI Agent is:",
+                            options: [
+                                "A calculator",
+                                "An AI assistant that books flights by checking availability, comparing prices, and making reservations",
+                                "A digital alarm clock",
+                                "A static website"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+                `,
+                
+                'mcp': `
+                    <div class="concept-header">
+                        <div class="text-6xl mb-4">🔗</div>
+                        <h2 class="text-4xl font-bold text-violet-400 mb-2">Model Context Protocol (MCP)</h2>
+                        <p class="text-slate-300 text-xl">Standardizing AI-to-tool communication</p>
+                    </div>
+
+                    <div class="glass-panel p-8 mt-6 mb-6 bg-violet-900/20 border-2 border-violet-500/30">
+                        <h3 class="text-2xl font-bold mb-4 text-violet-300">📖 What is MCP?</h3>
+                        <p class="text-lg text-slate-200 leading-relaxed mb-4">
+                            <span class="text-violet-300 font-bold">Model Context Protocol (MCP)</span> is a 
+                            <span class="text-violet-300 font-bold">standardized way for AI models to communicate with external tools, data sources, and systems</span>. 
+                            Think of it as a universal language that allows AI Agents to connect with any service or database.
+                        </p>
+                        <div class="p-4 bg-violet-950/30 rounded-lg">
+                            <p class="text-slate-300">
+                                <strong>Analogy:</strong> Just like USB-C is a standard connector for devices, MCP is a standard protocol for AI to connect with tools and data.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 mt-4 bg-violet-900/20">
+                        <h4 class="text-xl font-bold mb-3 text-violet-300">🎯 Why MCP is Important:</h4>
+                        <ul class="space-y-3 text-slate-200">
+                            <li class="flex items-start gap-3">
+                                <span class="text-2xl">🔌</span>
+                                <div>
+                                    <p class="font-bold">Interoperability</p>
+                                    <p class="text-sm text-slate-400">AI models can work with any tool that supports MCP without custom integration</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-2xl">⚡</span>
+                                <div>
+                                    <p class="font-bold">Efficiency</p>
+                                    <p class="text-sm text-slate-400">Reduces development time - no need to build custom connectors for each tool</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-2xl">🔐</span>
+                                <div>
+                                    <p class="font-bold">Security & Control</p>
+                                    <p class="text-sm text-slate-400">Standardized protocol enables better security practices and access control</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-2xl">🚀</span>
+                                <div>
+                                    <p class="font-bold">Scalability</p>
+                                    <p class="text-sm text-slate-400">AI Agents can easily scale to use hundreds of tools and data sources</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="text-2xl">🌐</span>
+                                <div>
+                                    <p class="font-bold">Ecosystem Growth</p>
+                                    <p class="text-sm text-slate-400">Creates a growing ecosystem where anyone can build MCP-compatible tools</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    ${generateQuizHTML('mcp', [
+                        {
+                            question: "What is Model Context Protocol (MCP)?",
+                            options: [
+                                "A new AI model",
+                                "A standardized protocol for AI to communicate with tools and data sources",
+                                "A programming language",
+                                "A cloud storage service"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "Why is MCP important for AI Agents?",
+                            options: [
+                                "It makes AI faster",
+                                "It enables AI to easily connect with any tool or data source using a standard protocol",
+                                "It reduces AI model size",
+                                "It improves AI graphics"
+                            ],
+                            correct: 1
+                        },
+                        {
+                            question: "MCP is similar to:",
+                            options: [
+                                "A specific AI model",
+                                "A universal connector like USB-C that allows different systems to work together",
+                                "A programming tutorial",
+                                "A data storage format"
+                            ],
+                            correct: 1
+                        }
+                    ])}
+                `
+            };
+            
+            function generateQuizHTML(concept, questions) {
+                let html = '<div class="game-container mt-6">';
+                html += '<h3 class="text-2xl font-bold mb-4 text-white">🎮 Test Your Knowledge - 3 Questions</h3>';
+                
+                questions.forEach((q, index) => {
+                    html += `
+                        <div class="quiz-question mb-8 p-6 bg-slate-800/30 rounded-lg border border-slate-600" id="${concept}-q${index}" style="${index > 0 ? 'display:none;' : ''}">
+                            <p class="text-lg font-bold mb-4 text-slate-200">Question ${index + 1} of ${questions.length}:</p>
+                            <p class="text-lg mb-4 text-slate-100">${q.question}</p>
+                            ${q.options.map((option, optIndex) => `
+                                <div class="game-option" onclick="checkQuizAnswer('${concept}', ${index}, ${optIndex}, ${optIndex === q.correct}, ${questions.length})">
+                                    ${option}
+                                </div>
+                            `).join('')}
+                            <div id="${concept}-q${index}-feedback" class="mt-4 p-4 rounded-lg" style="display:none;"></div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    <div id="${concept}-completion" class="mt-6 p-6 bg-green-900/30 border-2 border-green-500 rounded-lg text-center" style="display:none;">
+                        <div class="text-6xl mb-4">🎉</div>
+                        <h3 class="text-3xl font-bold text-green-400 mb-2">Congratulations!</h3>
+                        <p class="text-xl text-slate-200 mb-4">You've completed all questions!</p>
+                        <p class="text-lg text-slate-300" id="${concept}-score"></p>
+                    </div>
+                `;
+                
+                html += '</div>';
+                return html;
+            }
+            
+            return contents[concept] || '<p>Content not found</p>';
+        }
+
+        // Store quiz state for each concept
+        let quizState = {};
+        
+        function checkQuizAnswer(concept, questionIndex, selectedOption, isCorrect, totalQuestions) {
+            // Initialize quiz state if not exists
+            if (!quizState[concept]) {
+                quizState[concept] = { currentQuestion: 0, score: 0 };
+            }
+            
+            const questionDiv = document.getElementById(`${concept}-q${questionIndex}`);
+            const feedback = document.getElementById(`${concept}-q${questionIndex}-feedback`);
+            const options = questionDiv.querySelectorAll('.game-option');
+            
+            // Mark the clicked option
+            event.target.classList.add(isCorrect ? 'correct' : 'wrong');
+            
+            // Disable all options for this question
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+            
+            // Update score
+            if (isCorrect) {
+                quizState[concept].score++;
+            }
+            
+            // Show feedback
+            feedback.style.display = 'block';
+            if (isCorrect) {
+                feedback.className = 'mt-4 p-4 rounded-lg bg-green-900/30 border border-green-500/50';
+                feedback.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">✅</span>
+                        <div>
+                            <p class="text-lg font-bold text-green-400">Correct!</p>
+                            <p class="text-slate-300">${questionIndex < totalQuestions ? 'Next question coming up...' : 'You nailed it!'}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                feedback.className = 'mt-4 p-4 rounded-lg bg-orange-900/30 border border-orange-500/50';
+                feedback.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">💭</span>
+                        <div>
+                            <p class="text-lg font-bold text-orange-400">Not quite!</p>
+                            <p class="text-slate-300">${questionIndex < totalQuestions ? 'Keep going!' : 'Learn from the explanation above.'}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Show next question or completion message after 2 seconds
+            setTimeout(() => {
+                if (questionIndex < totalQuestions) {
+                    // Hide current question
+                    questionDiv.style.display = 'none';
+                    
+                    // Show next question
+                    const nextQuestionDiv = document.getElementById(`${concept}-q${questionIndex + 1}`);
+                    if (nextQuestionDiv) {
+                        nextQuestionDiv.style.display = 'block';
+                    }
+                } else {
+                    // Quiz completed - show final score
+                    questionDiv.style.display = 'none';
+                    const completionDiv = document.getElementById(`${concept}-completion`);
+                    if (completionDiv) {
+                        const percentage = Math.round((quizState[concept].score / totalQuestions) * 100);
+                        let message = '';
+                        let emoji = '';
+                        
+                        if (percentage === 100) {
+                            message = 'Perfect score! You\'re an expert!';
+                            emoji = '🏆';
+                        } else if (percentage >= 66) {
+                            message = 'Great job! You understand the concept well!';
+                            emoji = '🌟';
+                        } else if (percentage >= 33) {
+                            message = 'Good effort! Review the material for better understanding.';
+                            emoji = '👍';
+                        } else {
+                            message = 'Keep learning! Review the explanation above.';
+                            emoji = '📚';
+                        }
+                        
+                        completionDiv.innerHTML = `
+                            <div class="text-center p-8 bg-gradient-to-br from-blue-900/40 to-purple-900/40 rounded-xl border border-blue-500/30">
+                                <div class="text-6xl mb-4">${emoji}</div>
+                                <h3 class="text-3xl font-bold mb-3 text-blue-300">Quiz Completed!</h3>
+                                <div class="text-5xl font-bold mb-4 text-white">${quizState[concept].score} / ${totalQuestions}</div>
+                                <p class="text-xl text-slate-300 mb-6">${message}</p>
+                                <button onclick="restartQuiz('${concept}', ${totalQuestions})" 
+                                        class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transform hover:scale-105 transition-all">
+                                    🔄 Try Again
+                                </button>
+                            </div>
+                        `;
+                        completionDiv.style.display = 'block';
+                    }
+                }
+            }, 2000);
+        }
+        
+        function restartQuiz(concept, totalQuestions) {
+            // Reset quiz state
+            quizState[concept] = { currentQuestion: 0, score: 0 };
+            
+            // Hide completion screen
+            const completionDiv = document.getElementById(`${concept}-completion`);
+            if (completionDiv) {
+                completionDiv.style.display = 'none';
+            }
+            
+            // Reset all questions
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionDiv = document.getElementById(`${concept}-q${i}`);
+                if (questionDiv) {
+                    // Hide all questions except the first one
+                    questionDiv.style.display = i === 1 ? 'block' : 'none';
+                    
+                    // Reset options
+                    const options = questionDiv.querySelectorAll('.game-option');
+                    options.forEach(opt => {
+                        opt.style.pointerEvents = 'auto';
+                        opt.classList.remove('correct', 'wrong');
+                    });
+                    
+                    // Hide feedback
+                    const feedback = document.getElementById(`${concept}-q${i}-feedback`);
+                    if (feedback) {
+                        feedback.style.display = 'none';
+                    }
+                }
+            }
+        }
     </script>
 </body>
 </html>
